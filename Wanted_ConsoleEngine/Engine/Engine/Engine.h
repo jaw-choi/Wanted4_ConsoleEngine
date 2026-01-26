@@ -34,9 +34,15 @@ namespace Wanted
             bool GetKeyUp(int keyCode) const;
             //키가 눌려있는지 계속 확인.
             bool GetKey(int keyCode) const;
+            //새 레벨을 추가(설정)하는 함수.
+            void SetNewLevel(class Level* newLevel);
     private:
         //입력 처리 함수
         void ProcessInput();
+
+        //게임 플레이 시작 함수
+        // Unity의 경우: Start/Awake
+        void BeginPlay();
 
         //업데이트 함수
         void Tick(float deltaTime);
@@ -50,6 +56,7 @@ namespace Wanted
         //키 상태 저장용 배열.
         KeyState keyStates[255] = { };
 
+        Level* mainLevel = nullptr;
 
     };
 }

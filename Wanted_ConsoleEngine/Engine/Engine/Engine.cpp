@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "Level/Level.h"
 #include <iostream>
 #include <Windows.h>
 
@@ -13,7 +14,7 @@ namespace Wanted
 
     void Engine::Run()
     {
-            //시계의 정밀도
+        //시계의 정밀도
         LARGE_INTEGER frequency;
         QueryPerformanceFrequency(&frequency);
 
@@ -33,6 +34,7 @@ namespace Wanted
         float targetFrameRate = 120.0f;
         float oneFrameTime = 1.0f / targetFrameRate;
         //Engine Loop(Game Loop)
+        float sec = 0.f;
         while (!isQuit)
         {
             //현재 시간 구하기
@@ -45,14 +47,21 @@ namespace Wanted
 
             //초단위 변환
             delta_time = delta_time / static_cast<float>(frequency.QuadPart);
-            
+
 
             //프레임 처리
             //고정 프레임 기법
             if (delta_time >= oneFrameTime) {
 
                 ProcessInput();
-                Tick(delta_time);
+
+                //프레임 처리
+                BeginPlay();
+                sec += delta_time;
+                if (sec > 1.f) {
+                    Tick(delta_time);
+                    sec = 0;
+                }
                 Draw();
 
                 //이전 시간 값 갱신
@@ -65,7 +74,7 @@ namespace Wanted
                 }
             }
         }
-    //TODO: 정리작업
+        //TODO: 정리작업
         std::cout << "Engine has been Shutdown..." << std::endl;
     }
     void Engine::QuitEngine()
@@ -90,6 +99,20 @@ namespace Wanted
 
     }
 
+    void Engine::SetNewLevel(Level* newLevel)
+    {
+        //null check
+        //기존 레벨 있는지 확인
+        //TODO: 임시 코드. 레벨 전환할 때는 바로 제거하면 안됨.
+        if (mainLevel)
+        {
+            delete mainLevel;
+            mainLevel = nullptr;
+        }
+
+        mainLevel = newLevel;
+    }
+
     void Engine::ProcessInput()
     {
         //키 마다의 입력 읽기.
@@ -97,23 +120,47 @@ namespace Wanted
         for (int ix = 0; ix < 255; ++ix)
         {
             keyStates[ix].isKeyDown
-                = GetAsyncKeyState(ix) & 0x8000 > 0 ? true : false;
+                = ((GetAsyncKeyState(ix) & (0x8000)) > 0) ? true : false;
         }
+    }
+
+    void Engine::BeginPlay()
+    {
+        if (!mainLevel)
+        {
+            //Silent is violent
+            //log
+            std::cout << "mainLevel is empty\n";
+            return;
+        }
+        mainLevel->BeginPlay();
     }
 
     void Engine::Tick(float deltaTime)
     {
-        std::cout << "Delta Time: " << deltaTime
-                  << ", FPS " << (1.0f / deltaTime) <<std::endl;
-        // ESC키 누르면 종료
-        if(GetKeyDown(VK_ESCAPE))
+        //std::cout << "Delta Time: " << deltaTime
+        //          << ", FPS " << (1.0f / deltaTime) <<std::endl;
+        //// ESC키 누르면 종료
+        //if(GetKeyDown(VK_ESCAPE))
+        //{
+        //    QuitEngine();
+        //}
+        if (!mainLevel)
         {
-            QuitEngine();
+            std::cout << "Error : Engine::Tick(). mainLevel is empty.\n";
+            return;
         }
+        mainLevel->Tick(deltaTime);
     }
 
     void Engine::Draw()
     {
+        if (!mainLevel)
+        {
+            std::cout << "Error : Engine::Draw(). mainLevel is empty.\n";
+            return;
+        }
+        mainLevel->Draw();
     }
 
 }
