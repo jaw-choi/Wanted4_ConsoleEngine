@@ -1,8 +1,11 @@
 #include <iostream>
 #include "Engine/Engine.h"
+#include "Level/TestLevel.h"
+
 int main(void)
 {
     Wanted::Engine engine;
+    engine.SetNewLevel(new TestLevel());
     engine.Run();
     return 0;
 }

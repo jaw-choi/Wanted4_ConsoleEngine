@@ -10,6 +10,12 @@ namespace Wanted
     }
     Engine::~Engine()
     {
+        //메인 레벨 제거
+        if (mainLevel)
+        {
+            delete mainLevel;
+            mainLevel = nullptr;
+        }
     }
 
     void Engine::Run()
@@ -57,11 +63,11 @@ namespace Wanted
 
                 //프레임 처리
                 BeginPlay();
-                sec += delta_time;
-                if (sec > 1.f) {
+                //sec += delta_time;
+                //if (sec > 1.f) {
                     Tick(delta_time);
-                    sec = 0;
-                }
+                  //  sec = 0;
+                //}
                 Draw();
 
                 //이전 시간 값 갱신
@@ -141,10 +147,10 @@ namespace Wanted
         //std::cout << "Delta Time: " << deltaTime
         //          << ", FPS " << (1.0f / deltaTime) <<std::endl;
         //// ESC키 누르면 종료
-        //if(GetKeyDown(VK_ESCAPE))
-        //{
-        //    QuitEngine();
-        //}
+        if(GetKeyDown(VK_ESCAPE))
+        {
+            QuitEngine();
+        }
         if (!mainLevel)
         {
             std::cout << "Error : Engine::Tick(). mainLevel is empty.\n";

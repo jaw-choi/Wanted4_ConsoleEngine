@@ -25,7 +25,11 @@ namespace Wanted
         //액터에 이벤트 흘리기
         for (Actor*& actor : actors)
         {
-            //TODO: 이미 BeginPlay 호출된 액터는 건너뛰기.
+            if (actor->HasBeganPlay())
+            {
+                continue;
+            }
+
             actor->BeginPlay();
         }
     }
@@ -44,5 +48,12 @@ namespace Wanted
             //액터에 이벤트 흘리기
             actor->Draw();
         }
+    }
+    void Level::AddNewActor(Actor* newActor)
+    {
+        //TODO: 나중에 프레임 처리 고려해서 따로 추가 작업 해야 함.
+        actors.emplace_back(newActor);
+        //push_back lvalue ref 받음-> 복사
+        //emplace_back rvalue ref 받음 -> 임시값으로 보고 복사x, 참조전달함
     }
 }
