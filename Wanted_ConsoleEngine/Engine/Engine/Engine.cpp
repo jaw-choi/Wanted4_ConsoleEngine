@@ -1,172 +1,162 @@
 #include "Engine.h"
 #include "Level/Level.h"
+#include "Core/Input.h"
+
 #include <iostream>
 #include <Windows.h>
 
 namespace Wanted
 {
-    Engine::Engine()
-    {
-    }
-    Engine::~Engine()
-    {
-        //메인 레벨 제거
-        if (mainLevel)
-        {
-            delete mainLevel;
-            mainLevel = nullptr;
-        }
-    }
+	Engine::Engine()
+	{
+		// 입력 관리자 생성.
+		input = new Input();
+	}
 
-    void Engine::Run()
-    {
-        //시계의 정밀도
-        LARGE_INTEGER frequency;
-        QueryPerformanceFrequency(&frequency);
+	Engine::~Engine()
+	{
+		// 메인 레벨 제거.
+		if (mainLevel)
+		{
+			delete mainLevel;
+			mainLevel = nullptr;
+		}
 
-        //프레임 계산용 변수
-        //int64_t
-        __int64 currentTime = 0;
-        __int64 previousTime = 0;
+		// 입력 관리자 제거.
+		if (input)
+		{
+			delete input;
+			input = nullptr;
+		}
+	}
 
-        //하드웨어 타이머로 시간 구하기
-        LARGE_INTEGER time;
-        QueryPerformanceCounter(&time);
-        //엔진 시작 직전에는 두시간 값을 같게 맞춤
-        currentTime = time.QuadPart;
-        previousTime = currentTime;
+	void Engine::Run()
+	{
+		// 시계의 정밀도.
+		LARGE_INTEGER frequency;
+		QueryPerformanceFrequency(&frequency);
 
-        //초당 프레임 수
-        float targetFrameRate = 120.0f;
-        float oneFrameTime = 1.0f / targetFrameRate;
-        //Engine Loop(Game Loop)
-        float sec = 0.f;
-        while (!isQuit)
-        {
-            //현재 시간 구하기
-            QueryPerformanceCounter(&time);
-            currentTime = time.QuadPart;
+		// 프레임 계산용 변수.
+		int64_t currentTime = 0;
+		int64_t previousTime = 0;
 
+		// 하드웨어 타이머로 시간 구하기.
+		LARGE_INTEGER time;
+		QueryPerformanceCounter(&time);
 
-            //프레임 시간 계산
-            float delta_time = static_cast<float>(currentTime - previousTime);
+		// 엔진 시작 직전에는 두 시간 값을 같게 맞춤.
+		currentTime = time.QuadPart;
+		previousTime = currentTime;
 
-            //초단위 변환
-            delta_time = delta_time / static_cast<float>(frequency.QuadPart);
+		// 기준 프레임(단위: 초).
+		float targetFrameRate = 120.0f;
+		float oneFrameTime = 1.0f / targetFrameRate;
 
+		// 엔진 루프(게임 루프).
+		// !->Not -> bool값 뒤집기.
+		while (!isQuit)
+		{
+			// 현재 시간 구하기.
+			QueryPerformanceCounter(&time);
+			currentTime = time.QuadPart;
 
-            //프레임 처리
-            //고정 프레임 기법
-            if (delta_time >= oneFrameTime) {
+			// 프레임 시간 계산.
+			float deltaTime
+				= static_cast<float>(currentTime - previousTime);
 
-                ProcessInput();
+			// 초단위 변환.
+			deltaTime = deltaTime
+				/ static_cast<float>(frequency.QuadPart);
 
-                //프레임 처리
-                BeginPlay();
-                //sec += delta_time;
-                //if (sec > 1.f) {
-                    Tick(delta_time);
-                  //  sec = 0;
-                //}
-                Draw();
+			// 고정 프레임 기법.
+			if (deltaTime >= oneFrameTime)
+			{
+				input->ProcessInput();
 
-                //이전 시간 값 갱신
-                previousTime = currentTime;
+				// 프레임 처리.
+				BeginPlay();
+				Tick(deltaTime);
+				Draw();
 
-                //현재 입력 값을 이전 입력 값으로 저장.
-                for (int ix = 0; ix < 255; ++ix)
-                {
-                    keyStates[ix].wasKeyDown = keyStates[ix].isKeyDown;
-                }
-            }
-        }
-        //TODO: 정리작업
-        std::cout << "Engine has been Shutdown..." << std::endl;
-    }
-    void Engine::QuitEngine()
-    {
-        isQuit = true;
-    }
+				// 이전 시간 값 갱신.
+				previousTime = currentTime;
 
-    bool Engine::GetKeyDown(int keyCode) const
-    {
-        return keyStates[keyCode].isKeyDown && !keyStates[keyCode].wasKeyDown;
-    }
+				input->SavePreviousInputStates();
+			}
+		}
 
-    bool Engine::GetKeyUp(int keyCode) const
-    {
-        return !keyStates[keyCode].isKeyDown && keyStates[keyCode].wasKeyDown;
+		// Todo: 정리 작업.
+		std::cout << "Engine has been shutdown....\n";
+	}
 
-    }
+	void Engine::QuitEngine()
+	{
+		isQuit = true;
+	}
 
-    bool Engine::GetKey(int keyCode) const
-    {
-        return keyStates[keyCode].isKeyDown;
+	void Engine::SetNewLevel(Level* newLevel)
+	{
+		// 기존 레벨 있는지 확인.
+		// 있으면 기존 레벨 제거.
+		// Todo: 임시 코드. 레벨 전환할 때는 바로 제거하면 안됨.
+		if (mainLevel)
+		{
+			delete mainLevel;
+			mainLevel = nullptr;
+		}
 
-    }
+		// 레벨 설정.
+		mainLevel = newLevel;
+	}
 
-    void Engine::SetNewLevel(Level* newLevel)
-    {
-        //null check
-        //기존 레벨 있는지 확인
-        //TODO: 임시 코드. 레벨 전환할 때는 바로 제거하면 안됨.
-        if (mainLevel)
-        {
-            delete mainLevel;
-            mainLevel = nullptr;
-        }
+	void Engine::BeginPlay()
+	{
+		// 레벨이 있으면 이벤트 전달.
+		if (!mainLevel)
+		{
+			// Silent is violent.
+			// 침묵은 폭력이다.
+			// -> 로그 메시지 안남기면 나빠.
+			std::cout << "mainLevel is empty.\n";
+			return;
+		}
 
-        mainLevel = newLevel;
-    }
+		mainLevel->BeginPlay();
+	}
 
-    void Engine::ProcessInput()
-    {
-        //키 마다의 입력 읽기.
-        // !!! 운영체제가 제공하는 기능을 사용할 수 밖에 없음
-        for (int ix = 0; ix < 255; ++ix)
-        {
-            keyStates[ix].isKeyDown
-                = ((GetAsyncKeyState(ix) & (0x8000)) > 0) ? true : false;
-        }
-    }
+	void Engine::Tick(float deltaTime)
+	{
+		//std::cout
+		//	<< "DeltaTime: " << deltaTime
+		//	<< ", FPS: " << (1.0f / deltaTime) << "\n";
 
-    void Engine::BeginPlay()
-    {
-        if (!mainLevel)
-        {
-            //Silent is violent
-            //log
-            std::cout << "mainLevel is empty\n";
-            return;
-        }
-        mainLevel->BeginPlay();
-    }
+		// ESC키 눌리면 종료.
+		if (input->GetKeyDown(VK_ESCAPE))
+		{
+			QuitEngine();
+		}
 
-    void Engine::Tick(float deltaTime)
-    {
-        //std::cout << "Delta Time: " << deltaTime
-        //          << ", FPS " << (1.0f / deltaTime) <<std::endl;
-        //// ESC키 누르면 종료
-        if(GetKeyDown(VK_ESCAPE))
-        {
-            QuitEngine();
-        }
-        if (!mainLevel)
-        {
-            std::cout << "Error : Engine::Tick(). mainLevel is empty.\n";
-            return;
-        }
-        mainLevel->Tick(deltaTime);
-    }
+		// 레벨에 이벤트 흘리기.
+		// 예외처리.
+		if (!mainLevel)
+		{
+			std::cout << "Error: Engine::Tick(). mainLevel is empty.\n";
+			return;
+		}
 
-    void Engine::Draw()
-    {
-        if (!mainLevel)
-        {
-            std::cout << "Error : Engine::Draw(). mainLevel is empty.\n";
-            return;
-        }
-        mainLevel->Draw();
-    }
+		mainLevel->Tick(deltaTime);
+	}
 
+	void Engine::Draw()
+	{
+		// 레벨에 이벤트 흘리기.
+		// 예외처리.
+		if (!mainLevel)
+		{
+			std::cout << "Error: Engine::Draw(). mainLevel is empty.\n";
+			return;
+		}
+
+		mainLevel->Draw();
+	}
 }

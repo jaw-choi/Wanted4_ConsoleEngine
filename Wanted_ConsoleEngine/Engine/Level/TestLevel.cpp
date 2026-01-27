@@ -3,5 +3,6 @@
 
 TestLevel::TestLevel()
 {
-    AddNewActor(new TestActor());
+	// TestActor 액터를 레벨에 추가.
+	AddNewActor(new TestActor());
 }
