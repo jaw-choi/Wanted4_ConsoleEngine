@@ -1,10 +1,11 @@
 #pragma once
+#include "Common/Common.h"
 
 namespace Wanted
 {
     //Main game engine class
     //객체
-    class Engine
+    class WANTED_API Engine
     {
         //데이터 전용.
         //Down/Up/Key

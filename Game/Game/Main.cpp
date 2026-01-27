@@ -4,10 +4,11 @@
 #include "Actor/Actor.h"
 #include "Actor/TestActor.h"
 #include "Level/Level.h"
-int main(void)
+
+
+int main()
 {
     Wanted::Engine engine;
     engine.SetNewLevel(new TestLevel());
     engine.Run();
-    return 0;
 }

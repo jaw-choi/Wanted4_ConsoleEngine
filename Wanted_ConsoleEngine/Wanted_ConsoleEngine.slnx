@@ -2,5 +2,8 @@
   <Configurations>
     <Platform Name="x64" />
   </Configurations>
+  <Project Path="../Game/Game/Game.vcxproj" Id="1bf5fdd9-4f93-48de-ba36-635afd305337">
+    <BuildDependency Project="Engine/Engine.vcxproj" />
+  </Project>
   <Project Path="Engine/Engine.vcxproj" Id="4ac5742e-9814-4153-8eee-bae1c3cecf96" />
 </Solution>
