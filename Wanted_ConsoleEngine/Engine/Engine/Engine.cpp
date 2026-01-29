@@ -7,202 +7,238 @@
 
 namespace Wanted
 {
-    // 전역 변수 초기화.
-    Engine* Engine::instance = nullptr;
+	// 전역 변수 초기화.
+	Engine* Engine::instance = nullptr;
 
-    Engine::Engine()
-    {
-        // 전역 변수 값 초기화.
-        instance = this;
+	Engine::Engine()
+	{
+		// 전역 변수 값 초기화.
+		instance = this;
 
-        // 입력 관리자 생성.
-        input = new Input();
+		// 입력 관리자 생성.
+		input = new Input();
 
-        LoadSetting();
+		// 설정 파일 로드.
+		LoadSetting();
 
-    }
+		// 커서 끄기.
+		CONSOLE_CURSOR_INFO info = {};
+		GetConsoleCursorInfo(
+			GetStdHandle(STD_OUTPUT_HANDLE),
+			&info
+		);
 
-    Engine::~Engine()
-    {
-        // 메인 레벨 제거.
-        if (mainLevel)
-        {
-            delete mainLevel;
-            mainLevel = nullptr;
-        }
+		info.bVisible = false;
+		SetConsoleCursorInfo(
+			GetStdHandle(STD_OUTPUT_HANDLE),
+			&info
+		);
+	}
 
-        // 입력 관리자 제거.
-        if (input)
-        {
-            delete input;
-            input = nullptr;
-        }
-    }
+	Engine::~Engine()
+	{
+		// 메인 레벨 제거.
+		if (mainLevel)
+		{
+			delete mainLevel;
+			mainLevel = nullptr;
+		}
 
-    void Engine::Run()
-    {
-        // 시계의 정밀도.
-        LARGE_INTEGER frequency;
-        QueryPerformanceFrequency(&frequency);
+		// 입력 관리자 제거.
+		if (input)
+		{
+			delete input;
+			input = nullptr;
+		}
+	}
 
-        // 프레임 계산용 변수.
-        int64_t currentTime = 0;
-        int64_t previousTime = 0;
+	void Engine::Run()
+	{
+		// 시계의 정밀도.
+		LARGE_INTEGER frequency;
+		QueryPerformanceFrequency(&frequency);
 
-        // 하드웨어 타이머로 시간 구하기.
-        LARGE_INTEGER time;
-        QueryPerformanceCounter(&time);
+		// 프레임 계산용 변수.
+		int64_t currentTime = 0;
+		int64_t previousTime = 0;
 
-        // 엔진 시작 직전에는 두 시간 값을 같게 맞춤.
-        currentTime = time.QuadPart;
-        previousTime = currentTime;
+		// 하드웨어 타이머로 시간 구하기.
+		LARGE_INTEGER time;
+		QueryPerformanceCounter(&time);
 
-        // 기준 프레임(단위: 초).
-        //float targetFrameRate = 120.0f;
-        setting.frameRate = setting.frameRate == 0.0f ? 60.0f : setting.frameRate;
-        float oneFrameTime = 1.0f / setting.frameRate;
+		// 엔진 시작 직전에는 두 시간 값을 같게 맞춤.
+		currentTime = time.QuadPart;
+		previousTime = currentTime;
 
-        // 엔진 루프(게임 루프).
-        // !->Not -> bool값 뒤집기.
-        while (!isQuit)
-        {
-            // 현재 시간 구하기.
-            QueryPerformanceCounter(&time);
-            currentTime = time.QuadPart;
+		// 기준 프레임(단위: 초).
+		//float targetFrameRate = 120.0f;
+		//if (setting.framerate == 0.0f)
+		//{
+		//	setting.framerate = 60.0f;
+		//}
+		//else
+		//{
+		//	setting.framerate = setting.framerate;
+		//}
 
-            // 프레임 시간 계산.
-            float deltaTime
-                = static_cast<float>(currentTime - previousTime);
+		setting.framerate
+			= setting.framerate == 0.0f ? 60.0f : setting.framerate;
+		float oneFrameTime = 1.0f / setting.framerate;
 
-            // 초단위 변환.
-            deltaTime = deltaTime
-                / static_cast<float>(frequency.QuadPart);
+		// 엔진 루프(게임 루프).
+		// !->Not -> bool값 뒤집기.
+		while (!isQuit)
+		{
+			// 현재 시간 구하기.
+			QueryPerformanceCounter(&time);
+			currentTime = time.QuadPart;
 
-            // 고정 프레임 기법.
-            if (deltaTime >= oneFrameTime)
-            {
-                input->ProcessInput();
+			// 프레임 시간 계산.
+			float deltaTime
+				= static_cast<float>(currentTime - previousTime);
 
-                // 프레임 처리.
-                BeginPlay();
-                Tick(deltaTime);
-                Draw();
+			// 초단위 변환.
+			deltaTime = deltaTime
+				/ static_cast<float>(frequency.QuadPart);
 
-                // 이전 시간 값 갱신.
-                previousTime = currentTime;
+			// 고정 프레임 기법.
+			if (deltaTime >= oneFrameTime)
+			{
+				input->ProcessInput();
 
-                input->SavePreviousInputStates();
-            }
-        }
+				// 프레임 처리.
+				BeginPlay();
+				Tick(deltaTime);
+				Draw();
 
-        // Todo: 정리 작업.
-        std::cout << "Engine has been shutdown....\n";
-    }
+				// 이전 시간 값 갱신.
+				previousTime = currentTime;
 
-    void Engine::QuitEngine()
-    {
-        isQuit = true;
-    }
+				input->SavePreviousInputStates();
+			}
+		}
 
-    void Engine::SetNewLevel(Level* newLevel)
-    {
-        // 기존 레벨 있는지 확인.
-        // 있으면 기존 레벨 제거.
-        // Todo: 임시 코드. 레벨 전환할 때는 바로 제거하면 안됨.
-        if (mainLevel)
-        {
-            delete mainLevel;
-            mainLevel = nullptr;
-        }
+		// Todo: 정리 작업.
+		std::cout << "Engine has been shutdown....\n";
 
-        // 레벨 설정.
-        mainLevel = newLevel;
-    }
+		// 커서 켜기.
+		CONSOLE_CURSOR_INFO info = {};
+		GetConsoleCursorInfo(
+			GetStdHandle(STD_OUTPUT_HANDLE),
+			&info
+		);
 
-    Engine& Engine::Get()
-    {
-        // 예외처리.
-        if (!instance)
-        {
-            // Silent is violent.
-            std::cout << "Error: Engine::Get(). instance is null\n";
-            __debugbreak();
-        }
+		info.bVisible = true;
+		SetConsoleCursorInfo(
+			GetStdHandle(STD_OUTPUT_HANDLE),
+			&info
+		);
+	}
 
-        return *instance;
-    }
+	void Engine::QuitEngine()
+	{
+		isQuit = true;
+	}
 
-    void Engine::LoadSetting()
-    {
-        FILE* file = nullptr;
-        
-        //open
-        fopen_s(&file, "../Config/Setting.txt", "rt");
-        
-        //exception
-        if (!file)
-        {
-            std::cout << " Failed to open Engine Setting File.\n";
-            __debugbreak();
-            return;
-        }
+	void Engine::SetNewLevel(Level* newLevel)
+	{
+		// 기존 레벨 있는지 확인.
+		// 있으면 기존 레벨 제거.
+		// Todo: 임시 코드. 레벨 전환할 때는 바로 제거하면 안됨.
+		if (mainLevel)
+		{
+			delete mainLevel;
+			mainLevel = nullptr;
+		}
 
-        //파일에서 읽은 데이터 담을 버퍼
-        char buffer[2048] = {};
+		// 레벨 설정.
+		mainLevel = newLevel;
+	}
 
-        size_t readSize = fread(buffer, sizeof(char), 2048, file);
+	Engine& Engine::Get()
+	{
+		// 예외처리.
+		if (!instance)
+		{
+			// Silent is violent.
+			std::cout << "Error: Engine::Get(). instance is null\n";
+			__debugbreak();
+		}
 
-        //문자열 포맷 활용해서 데이터 추출
-        sscanf_s(buffer, "frameRate = %f", &setting.frameRate);
+		return *instance;
+	}
 
-        //close
-        fclose(file);
-    }
+	void Engine::LoadSetting()
+	{
+		// 엔진 설정 파일 열기.
+		FILE* file = nullptr;
+		fopen_s(&file, "../Config/Setting.txt", "rt");
 
-    void Engine::BeginPlay()
-    {
-        // 레벨이 있으면 이벤트 전달.
-        if (!mainLevel)
-        {
-            // Silent is violent.
-            // 침묵은 폭력이다.
-            // -> 로그 메시지 안남기면 나빠.
-            std::cout << "mainLevel is empty.\n";
-            return;
-        }
+		// 예외처리.
+		if (!file)
+		{
+			std::cout << "Failed to open engine setting file.\n";
+			__debugbreak();
+			return;
+		}
 
-        mainLevel->BeginPlay();
-    }
+		// 파일에서 읽은 데이터 담을 버퍼.
+		char buffer[2048] = {};
 
-    void Engine::Tick(float deltaTime)
-    {
-        //std::cout
-        //	<< "DeltaTime: " << deltaTime
-        //	<< ", FPS: " << (1.0f / deltaTime) << "\n";
+		// 파일에서 읽기.
+		size_t readSize = fread(buffer, sizeof(char), 2048, file);
+
+		// 문자열 포맷 활용해서 데이터 추출.
+		sscanf_s(buffer, "framerate = %f", &setting.framerate);
+
+		// 파일 닫기.
+		fclose(file);
+	}
+
+	void Engine::BeginPlay()
+	{
+		// 레벨이 있으면 이벤트 전달.
+		if (!mainLevel)
+		{
+			// Silent is violent.
+			// 침묵은 폭력이다.
+			// -> 로그 메시지 안남기면 나빠.
+			std::cout << "mainLevel is empty.\n";
+			return;
+		}
+
+		mainLevel->BeginPlay();
+	}
+
+	void Engine::Tick(float deltaTime)
+	{
+		//std::cout
+		//	<< "DeltaTime: " << deltaTime
+		//	<< ", FPS: " << (1.0f / deltaTime) << "\n";
 
 
 
-        // 레벨에 이벤트 흘리기.
-        // 예외처리.
-        if (!mainLevel)
-        {
-            std::cout << "Error: Engine::Tick(). mainLevel is empty.\n";
-            return;
-        }
+		// 레벨에 이벤트 흘리기.
+		// 예외처리.
+		if (!mainLevel)
+		{
+			std::cout << "Error: Engine::Tick(). mainLevel is empty.\n";
+			return;
+		}
 
-        mainLevel->Tick(deltaTime);
-    }
+		mainLevel->Tick(deltaTime);
+	}
 
-    void Engine::Draw()
-    {
-        // 레벨에 이벤트 흘리기.
-        // 예외처리.
-        if (!mainLevel)
-        {
-            std::cout << "Error: Engine::Draw(). mainLevel is empty.\n";
-            return;
-        }
+	void Engine::Draw()
+	{
+		// 레벨에 이벤트 흘리기.
+		// 예외처리.
+		if (!mainLevel)
+		{
+			std::cout << "Error: Engine::Draw(). mainLevel is empty.\n";
+			return;
+		}
 
-        mainLevel->Draw();
-    }
+		mainLevel->Draw();
+	}
 }
