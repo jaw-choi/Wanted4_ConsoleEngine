@@ -13,6 +13,7 @@ Player::Player()
 //: Actor()
 	: super('T', Vector2(5, 5),Color::Red) //text로 타입정보남겨서 텍스트로 읽어오기
 {
+    sortingOrder = 10;
 }
 
 void Player::BeginPlay()
