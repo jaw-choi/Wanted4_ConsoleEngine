@@ -2,6 +2,7 @@
 
 #include "Common/RTTI.h"
 #include "Math/Vector2.h"
+#include "Util/Util.h"
 
 namespace Wanted
 {

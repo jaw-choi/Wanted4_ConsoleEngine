@@ -1,7 +1,7 @@
 #include "Engine.h"
 #include "Level/Level.h"
 #include "Core/Input.h"
-
+#include "Util/Util.h"
 #include <iostream>
 #include <Windows.h>
 
@@ -22,17 +22,7 @@ namespace Wanted
 		LoadSetting();
 
 		// 커서 끄기.
-		CONSOLE_CURSOR_INFO info = {};
-		GetConsoleCursorInfo(
-			GetStdHandle(STD_OUTPUT_HANDLE),
-			&info
-		);
-
-		info.bVisible = false;
-		SetConsoleCursorInfo(
-			GetStdHandle(STD_OUTPUT_HANDLE),
-			&info
-		);
+		Util::TurnOffCursor();
 	}
 
 	Engine::~Engine()
@@ -70,17 +60,6 @@ namespace Wanted
 		currentTime = time.QuadPart;
 		previousTime = currentTime;
 
-		// 기준 프레임(단위: 초).
-		//float targetFrameRate = 120.0f;
-		//if (setting.framerate == 0.0f)
-		//{
-		//	setting.framerate = 60.0f;
-		//}
-		//else
-		//{
-		//	setting.framerate = setting.framerate;
-		//}
-
 		setting.framerate
 			= setting.framerate == 0.0f ? 60.0f : setting.framerate;
 		float oneFrameTime = 1.0f / setting.framerate;
@@ -115,6 +94,12 @@ namespace Wanted
 				previousTime = currentTime;
 
 				input->SavePreviousInputStates();
+
+				//레벨에 요청된 추가/제거 처리.
+				if (mainLevel)
+				{
+				    mainLevel->ProcessAddAndDestroyActors();
+				}
 			}
 		}
 
@@ -122,17 +107,7 @@ namespace Wanted
 		std::cout << "Engine has been shutdown....\n";
 
 		// 커서 켜기.
-		CONSOLE_CURSOR_INFO info = {};
-		GetConsoleCursorInfo(
-			GetStdHandle(STD_OUTPUT_HANDLE),
-			&info
-		);
-
-		info.bVisible = true;
-		SetConsoleCursorInfo(
-			GetStdHandle(STD_OUTPUT_HANDLE),
-			&info
-		);
+		Util::TurnOnCursor();
 	}
 
 	void Engine::QuitEngine()
