@@ -2,7 +2,7 @@
 
 #include "Common/Common.h"
 #include <Windows.h>
-
+#define vec2 Vector2
 namespace Wanted
 {
 	class WANTED_API Vector2

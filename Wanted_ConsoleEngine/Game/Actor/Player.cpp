@@ -1,27 +1,30 @@
-#include "TestActor.h"
+#include "Player.h"
 #include "Core/Input.h"
 #include "Engine/Engine.h"
+#include "Box.h"
+#include "Level/Level.h"
+
 #include <iostream>
 #include <Windows.h>
 
 using namespace Wanted;
 
-TestActor::TestActor()
+Player::Player()
 //: Actor()
-	: super('T', Vector2(5, 5))
+	: super('T', Vector2(5, 5),Color::Red) //text로 타입정보남겨서 텍스트로 읽어오기
 {
 }
 
-void TestActor::BeginPlay()
+void Player::BeginPlay()
 {
 	// 상위 함수 호출.
 	// C++는 부모함수 가리키는 포인터가 없음.
 	Actor::BeginPlay();
 
-	//std::cout << "TestActor::BeginPlay().\n";
+	//std::cout << "Player::BeginPlay().\n";
 }
 
-void TestActor::Tick(float deltaTime)
+void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
@@ -30,6 +33,15 @@ void TestActor::Tick(float deltaTime)
 	{
 		// Todo: 게임 엔진 종료 요청.
 		Wanted::Engine::Get().QuitEngine();
+	}
+
+	//if (Input::Get().GetKey('D'))
+	if (Input::Get().GetKey(VK_SPACE))
+	{
+	    if (owner)//poiner다룰때 항상 null check하기
+	    {
+		owner->AddNewActor(new Box(GetPosition()));
+	    }
 	}
 
 	// 이동.
@@ -54,19 +66,20 @@ void TestActor::Tick(float deltaTime)
 	    SetPosition(newPosition);
 	}
 
-	if (Input::Get().GetKey(VK_DOWN) && GetPosition().y < 20)
+	if (Input::Get().GetKey(VK_DOWN) && GetPosition().y < 15)
 	{
 	    Vector2 newPosition = GetPosition();
-	    newPosition.y += 1;
+	    newPosition = newPosition - Vector2::Up;
+	    //newPosition.y += 1;
 	    SetPosition(newPosition);
 	}
 
 	//std::cout
-	//	<< "TestActor::Tick(). deltaTime: " << deltaTime
+	//	<< "Player::Tick(). deltaTime: " << deltaTime
 	//	<< ", FPS: " << (1.0f / deltaTime) << "\n";
 }
 
-void TestActor::Draw()
+void Player::Draw()
 {
 	Actor::Draw();
 }
