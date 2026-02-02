@@ -50,8 +50,6 @@ namespace Wanted
 
     void Level::Draw()
     {
-
-
         // 액터에 이벤트 흘리기.
         for (Actor* actor : actors)
         {
