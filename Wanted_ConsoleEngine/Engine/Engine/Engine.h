@@ -1,19 +1,19 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Common/Common.h"
 
 namespace Wanted
 {
-	// Àü¹æ ¼±¾ğ.
+	// ì „ë°© ì„ ì–¸.
 	class Input;
 
 	// Main game engine class.
 	class WANTED_API Engine
 	{
-		// ¿£Áø ¼³Á¤ ±¸Á¶Ã¼.
+		// ì—”ì§„ ì„¤ì • êµ¬ì¡°ì²´.
 		struct EngineSetting
 		{
-			// ÇÁ·¹ÀÓ ¼Óµµ.
+			// í”„ë ˆì„ ì†ë„.
 			float framerate = 0.0f;
 		};
 
@@ -21,50 +21,50 @@ namespace Wanted
 		Engine();
 		~Engine();
 
-		// ¿£Áø ·çÇÁ(°ÔÀÓ ·çÇÁ).
+		// ì—”ì§„ ë£¨í”„(ê²Œì„ ë£¨í”„).
 		void Run();
 
-		// ¿£Áø Á¾·á ÇÔ¼ö.
+		// ì—”ì§„ ì¢…ë£Œ í•¨ìˆ˜.
 		void QuitEngine();
 
-		// »õ ·¹º§À» Ãß°¡(¼³Á¤)ÇÏ´Â ÇÔ¼ö.
+		// ìƒˆ ë ˆë²¨ì„ ì¶”ê°€(ì„¤ì •)í•˜ëŠ” í•¨ìˆ˜.
 		void SetNewLevel(class Level* newLevel);
 
-		// Àü¿ª Á¢±Ù ÇÔ¼ö.
+		// ì „ì—­ ì ‘ê·¼ í•¨ìˆ˜.
 		static Engine& Get();
 
-	private:
+	protected:
 
-		// Á¤¸® ÇÔ¼ö.
+		// ì •ë¦¬ í•¨ìˆ˜.
 		void Shutdown();
 
-		// ¼³Á¤ ÆÄÀÏ ·Îµå ÇÔ¼ö.
+		// ì„¤ì • íŒŒì¼ ë¡œë“œ í•¨ìˆ˜.
 		void LoadSetting();
 
-		// °ÔÀÓ ÇÃ·¹ÀÌ ½ÃÀÛ ÇÔ¼ö.
-		// UnityÀÇ °æ¿ì: Start/Awake.
+		// ê²Œì„ í”Œë ˆì´ ì‹œì‘ í•¨ìˆ˜.
+		// Unityì˜ ê²½ìš°: Start/Awake.
 		void BeginPlay();
 
-		// ¾÷µ¥ÀÌÆ® ÇÔ¼ö.
+		// ì—…ë°ì´íŠ¸ í•¨ìˆ˜.
 		void Tick(float deltaTime);
 
-		// ±×¸®±â ÇÔ¼ö. (Draw/Render).
+		// ê·¸ë¦¬ê¸° í•¨ìˆ˜. (Draw/Render).
 		void Draw();
 
-	private:
-		// ¿£Áø Á¾·á ÇÃ·¡±×.
+	protected:
+		// ì—”ì§„ ì¢…ë£Œ í”Œë˜ê·¸.
 		bool isQuit = false;
 
-		// ¿£Áø ¼³Á¤ °ª.
+		// ì—”ì§„ ì„¤ì • ê°’.
 		EngineSetting setting;
 
-		// ÀÔ·Â °ü¸®ÀÚ.
+		// ì…ë ¥ ê´€ë¦¬ì.
 		Input* input = nullptr;
 
-		// ¸ŞÀÎ ·¹º§.
+		// ë©”ì¸ ë ˆë²¨.
 		class Level* mainLevel = nullptr;
 
-		// Àü¿ª º¯¼ö.
+		// ì „ì—­ ë³€ìˆ˜.
 		static Engine* instance;
 	};
 }
