@@ -50,6 +50,8 @@ namespace Wanted
 
     void Level::Draw()
     {
+
+
         // 액터에 이벤트 흘리기.
         for (Actor* actor : actors)
         {
@@ -60,23 +62,21 @@ namespace Wanted
                 {
                     continue;
                 }
+                //위치 비교.
                 if (actor->GetPosition() == otherActor->GetPosition())
                 {
+                    //정렬 순서 비교.
+                    if (actor->GetSortingOrder() < otherActor->GetSortingOrder()) {
+
                     search = otherActor;
                     break;
+                    }
                 }
             }
             if (!search) {
                 actor->Draw();
                 continue;
             }
-            if (search)
-            {
-                if ((actor->GetSortingOrder() > search->GetSortingOrder()))
-                    actor->Draw();
-                else
-                    search->Draw();
-            } 
         }
     }
 

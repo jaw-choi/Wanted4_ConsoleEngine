@@ -8,4 +8,6 @@ class TestLevel : public Wanted::Level
 
 public:
 	TestLevel();
+private:
+    void LoadMap(const char* filename);
 };
