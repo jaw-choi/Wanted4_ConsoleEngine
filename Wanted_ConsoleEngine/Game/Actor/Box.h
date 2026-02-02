@@ -1,13 +1,14 @@
 #pragma once
+
 #include "Actor/Actor.h"
 
 using namespace Wanted;
+
 class Box : public Actor
 {
-    //RTTI 등록.
-    RTTI_DECLARATIONS(Box, Actor);
-public:
-    Box(const vec2& newPosition);
-    //~Box();
-};
+	// RTTI 등록.
+	RTTI_DECLARATIONS(Box, Actor)
 
+public:
+	Box(const Vector2& newPosition);
+};

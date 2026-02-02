@@ -1,143 +1,165 @@
-#include "SokobanLevel.h"
+ï»¿#include "SokobanLevel.h"
 #include "Actor/Player.h"
 #include "Actor/Wall.h"
 #include "Actor/Ground.h"
 #include "Actor/Box.h"
 #include "Actor/Target.h"
-
 #include <iostream>
-/*
-* #:º®
-* .:¹Ù´Ú
-* P:Player
-* B:Box
-* T:Target
-*/
 
+/*
+#: ë²½(Wall)
+.: ë°”ë‹¥(Ground)
+p: í”Œë ˆì´ì–´(Player)
+b: ë°•ìŠ¤(Box)
+t: íƒ€ê²Ÿ(Target)
+*/ 
 
 SokobanLevel::SokobanLevel()
 {
-	// Player ¾×ÅÍ¸¦ ·¹º§¿¡ Ãß°¡.
+	// TestActor ì•¡í„°ë¥¼ ë ˆë²¨ì— ì¶”ê°€.
 	//AddNewActor(new Player());
-    LoadMap("Stage1.txt");
+	LoadMap("Map.txt");
+	//LoadMap("Stage1.txt");
 }
 
 void SokobanLevel::LoadMap(const char* filename)
 {
-    //ÆÄÀÏ ·Îµå.
-    //ÃÖÁ¾ ÆÄÀÏ °æ·Î ¸¸µé±â.
-    char path[2048] = {};
-    sprintf_s(path, 2048, "../Assets/%s", filename);
+	// íŒŒì¼ ë¡œë“œ.
+	// ìµœì¢… íŒŒì¼ ê²½ë¡œ ë§Œë“¤ê¸°. ("../Assets/filename")
+	char path[2048] = {};
+	sprintf_s(path, 2048, "../Assets/%s", filename);
 
-    //ÆÄÀÏ ¿­±â
-    FILE* file = nullptr;
-    fopen_s(&file, path, "rt");
+	// íŒŒì¼ ì—´ê¸°.
+	FILE* file = nullptr;
+	fopen_s(&file, path, "rt");
 
-    //Exception
-    if (!file)
-    {
-	// Ç¥ÁØ ¿À·ù ÄÜ¼Ö È°¿ë. 
-	std::cerr << "Failed to open map file.\n";
-	//µğ¹ö±× ¸ğµå¿¡¼­ Áß´ÜÁ¡À¸·Î Áß´ÜÇØÁÖ´Â ±â´É. 
-	__debugbreak();
-    }
-
-    //¸Ê ÀĞ±â.
-    //¸Ê Å©±â ÆÄ¾Ç : File Position Æ÷ÀÎÅÍ¸¦ ÆÄÀÏÀÇ ³¡À¸·Î ÀÌµ¿.
-    fseek(file, 0, SEEK_END);
-
-    //ÀÌ À§Ä¡ ÀĞ±â
-    size_t fileSize = ftell(file);
-
-    // File Position Ã³À½À¸·Î µÇµ¹¸®±â.
-    rewind(file);
-
-    //ÆÄÀÏ¿¡¼­ µ¥ÀÌÅÍ¸¦ ÀĞ¾î¿Ã ¹öÆÛ »ı¼º.
-    char* data = new char[fileSize + 1]; //null¹®ÀÚ ¶§¹®¿¡ +1
-
-    //µ¥ÀÌÅÍ ÀĞ±â
-    size_t readSize = fread(data, sizeof(char), fileSize, file);
-
-    //°´Ã¼¸¦ »ı¼ºÇÒ À§Ä¡ °ª.
-    Wanted::vec2 position;
-
-
-    // ÀĞ¾î¿Â ¹®ÀÚ¿­À» ºĞ¼®(ÆÄ½Ì-parsing)ÇØ¼­ Ãâ·Â.
-    int index = 0;
-    while (true)
-    {
-	if (index >= fileSize)
+	// ì˜ˆì™¸ ì²˜ë¦¬.
+	if (!file)
 	{
-	    break;
+		// í‘œì¤€ ì˜¤ë¥˜ ì½˜ì†” í™œìš©.
+		std::cerr << "Failed to open map file.\n";
+
+		// ë””ë²„ê·¸ ëª¨ë“œì—ì„œ ì¤‘ë‹¨ì ìœ¼ë¡œ ì¤‘ë‹¨í•´ì£¼ëŠ” ê¸°ëŠ¥.
+		__debugbreak();
 	}
 
-	// Ä³¸¯ÅÍ ÀĞ±â.
-	char mapCharacter = data[index];
-	++index;
+	// ë§µ ì½ê¸°.
+	// ë§µ í¬ê¸° íŒŒì•…: File Position í¬ì¸í„°ë¥¼ íŒŒì¼ì˜ ëìœ¼ë¡œ ì´ë™.
+	fseek(file, 0, SEEK_END);
 
-	// °³Çà ¹®ÀÚ Ã³¸®.
-	if (mapCharacter == '\n')
+	// ì´ ìœ„ì¹˜ ì½ê¸°.
+	size_t fileSize = ftell(file);
+
+	// File Position ì²˜ìŒìœ¼ë¡œ ë˜ëŒë¦¬ê¸°.
+	rewind(file);
+
+	// íŒŒì¼ì—ì„œ ë°ì´í„°ë¥¼ ì½ì–´ì˜¬ ë²„í¼ ìƒì„±.
+	char* data = new char[fileSize + 1];
+
+	// ë°ì´í„° ì½ê¸°.
+	size_t readSize = fread(data, sizeof(char), fileSize, file);
+
+	// ì½ì–´ì˜¨ ë¬¸ìì—´ì„ ë¶„ì„(íŒŒì‹±-Parsing)í•´ì„œ ì¶œë ¥.
+	// ì¸ë±ìŠ¤ë¥¼ ì‚¬ìš©í•´ í•œë¬¸ìì”© ì½ê¸°.
+	int index = 0;
+
+	// ê°ì²´ë¥¼ ìƒì„±í•  ìœ„ì¹˜ ê°’.
+	Wanted::Vector2 position;
+
+	while (true)
 	{
-	    std::cout << "\n";
-	    ++position.y;
-	    position.x = 0;
-	    continue;
+		// ì¢…ë£Œ ì¡°ê±´.
+		if (index >= fileSize)
+		{
+			break;
+		}
+
+		// ìºë¦­í„° ì½ê¸°.
+		char mapCharacter = data[index];
+		++index;
+
+		// ê°œí–‰ ë¬¸ì ì²˜ë¦¬.
+		if (mapCharacter == '\n')
+		{
+			//std::cout << "\n";
+			// yì¢Œí‘œëŠ” í•˜ë‚˜ ëŠ˜ë¦¬ê³ , x ì¢Œí‘œ ì´ˆê¸°í™”.
+			++position.y;
+			position.x = 0;
+			continue;
+		}
+
+		/*
+		#: ë²½(Wall)
+		.: ë°”ë‹¥(Ground)
+		p: í”Œë ˆì´ì–´(Player)
+		b: ë°•ìŠ¤(Box)
+		t: íƒ€ê²Ÿ(Target)
+		*/
+		// í•œë¬¸ìì”© ì²˜ë¦¬.
+		switch (mapCharacter)
+		{
+		case '#':
+		case '1':
+			//std::cout << "#";
+			AddNewActor(new Wall(position));
+			break;
+
+		case '.':
+			//std::cout << " ";
+			AddNewActor(new Ground(position));
+			break;
+
+		case 'p':
+			//std::cout << "P";
+			// í”Œë ˆì´ì–´ë„ ì´ë™ ê°€ëŠ¥í•¨.
+			// í”Œë ˆì´ì–´ ë°‘ì— ë•…ì´ ìˆì–´ì•¼ í•¨.
+			AddNewActor(new Player(position));
+			AddNewActor(new Ground(position));
+			break;
+
+		case 'b':
+			//std::cout << "B";
+			// ë°•ìŠ¤ëŠ” ì´ë™ ê°€ëŠ¥í•¨.
+			// ë°•ìŠ¤ê°€ ì˜®ê²¨ì¡Œì„ ë•Œ ê·¸ ë°‘ì— ë•…ì´ ìˆì–´ì•¼ í•¨.
+			AddNewActor(new Box(position));
+			AddNewActor(new Ground(position));
+			break;
+
+		case 't':
+			//std::cout << "T";
+			AddNewActor(new Target(position));
+			break;
+		}
+
+		// x ì¢Œí‘œ ì¦ê°€ ì²˜ë¦¬.
+		++position.x;
 	}
 
-	switch (mapCharacter)
-	{
-	case '1':
-	    //std::cout << "#";
-	    AddNewActor(new Wall(position));
-	    break;
-	case '.':
-	    AddNewActor(new Ground(position));
-	    //std::cout << " ";
-	    break;
-	case 'p':
-	    //std::cout << "P";
-	    AddNewActor(new Player(position));
-	    AddNewActor(new Ground(position));
-	    break;
-	case 'b':
-	    //std::cout << "B";
-	    // ¹Ú½º´Â ÀÌµ¿ °¡´ÉÇÔ
-	    // ¹Ú½º°¡ ¿Å°ÜÁ³À» ¶§ ±× ¹Ø¿¡ ¶¥ÀÌ ÀÖ¾î¾ßÇÔ
-	    AddNewActor(new Box(position));
-	    AddNewActor(new Ground(position));
-	    break;
-	case 't':
-	    //std::cout << "T";
-	    AddNewActor(new Target(position));
-	    break;
-	}
+	// ì‚¬ìš©í•œ ë²„í¼ í•´ì œ.
+	delete[] data;
 
-	//xÁÂÇ¥ Áõ°¡ Ã³¸®.
-	++position.x;
-    }
-
-    // »ç¿ëÇÑ ¹öÆÛ ÇØÁ¦.
-    delete[] data;
-
-
-    //ÆÄÀÏÀÌ Á¤»óÀûÀ¸·Î ¿­·ÈÀ¸¸é ´İ±â.
-    fclose(file);
+	// íŒŒì¼ì´ ì •ìƒì ìœ¼ë¡œ ì—´ë ¸ìœ¼ë©´ ë‹«ê¸°.
+	fclose(file);
 }
 
-bool SokobanLevel::CanMove(const Wanted::Vector2& playerPosition, const Wanted::Vector2& nextPosition)
+bool SokobanLevel::CanMove(
+	const Wanted::Vector2& playerPosition, 
+	const Wanted::Vector2& nextPosition)
 {
-    // ·¹º§¿¡ ÀÖ´Â ¹Ú½º ¾×ÅÍ ¸ğÀ¸±â.
-    // ¹Ú½º´Â ÇÃ·¹ÀÌ¾î°¡ ¹Ğ±â µî Ãß°¡ÀûÀ¸·Î Ã³¸®ÇØ¾ßÇÏ±â ¶§¹®.
-    std::vector<Actor*> boxes;
-    // ·¹º§¿¡ ¹èÄ¡µÈ ÀüÃ¼ ¾×ÅÍ¸¦ ¼øÈ¸ÇÏ¸é¼­ ¹Ú½º Ã£±â.
-    for (Actor* const actor : actors)
-    {
-	// ¾×ÅÍ°¡ ¹Ú½º Å¸ÀÔÀÎÁö È®ÀÎ.
-	if (actor->IsTypeOf<Box>())
+	// ë ˆë²¨ì— ìˆëŠ” ë°•ìŠ¤ ì•¡í„° ëª¨ìœ¼ê¸°.
+	// ë°•ìŠ¤ëŠ” í”Œë ˆì´ì–´ê°€ ë°€ê¸° ë“± ì¶”ê°€ì ìœ¼ë¡œ ì²˜ë¦¬í•´ì•¼í•˜ê¸° ë•Œë¬¸.
+	std::vector<Actor*> boxes;
+
+	// ë ˆë²¨ì— ë°°ì¹˜ëœ ì „ì²´ ì•¡í„°ë¥¼ ìˆœíšŒí•˜ë©´ì„œ ë°•ìŠ¤ ì°¾ê¸°.
+	for (Actor* const actor : actors)
 	{
-	    boxes.emplace_back(actor);
-	    continue;
+		// ì•¡í„°ê°€ ë°•ìŠ¤ íƒ€ì…ì¸ì§€ í™•ì¸.
+		if (actor->IsTypeOf<Box>())
+		{
+			boxes.emplace_back(actor);
+			continue;
+		}
 	}
-    }
-    return false;
+
+	return false;
 }

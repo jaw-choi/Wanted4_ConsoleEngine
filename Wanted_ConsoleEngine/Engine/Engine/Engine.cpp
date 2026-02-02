@@ -2,6 +2,7 @@
 #include "Level/Level.h"
 #include "Core/Input.h"
 #include "Util/Util.h"
+
 #include <iostream>
 #include <Windows.h>
 
@@ -95,16 +96,16 @@ namespace Wanted
 
 				input->SavePreviousInputStates();
 
-				//레벨에 요청된 추가/제거 처리.
+				// 레벨에 요청된 추가/제거 처리.
 				if (mainLevel)
 				{
-				    mainLevel->ProcessAddAndDestroyActors();
+					mainLevel->ProcessAddAndDestroyActors();
 				}
 			}
 		}
 
-		ShutDown();
-
+		// 정리.
+		Shutdown();
 	}
 
 	void Engine::QuitEngine()
@@ -140,13 +141,13 @@ namespace Wanted
 		return *instance;
 	}
 
-	void Engine::ShutDown()
+	void Engine::Shutdown()
 	{
-	    // Todo: 정리 작업.
-	    std::cout << "Engine has been shutdown....\n";
+		// 정리 작업.
+		std::cout << "Engine has been shutdown....\n";
 
-	    // 커서 켜기.
-	    Util::TurnOnCursor();
+		// 커서 켜기.
+		Util::TurnOnCursor();
 	}
 
 	void Engine::LoadSetting()

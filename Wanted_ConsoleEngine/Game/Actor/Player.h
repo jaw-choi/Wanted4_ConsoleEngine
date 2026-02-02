@@ -9,8 +9,7 @@ class Player : public Actor
 	RTTI_DECLARATIONS(Player, Actor)
 
 public:
-    Player();
-    Player(const vec2& position);
+	Player(const Vector2& position);
 
 protected:
 	virtual void BeginPlay() override;

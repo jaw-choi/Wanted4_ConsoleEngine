@@ -29,7 +29,7 @@ namespace Wanted
 		template<typename T>
 		bool IsTypeOf()
 		{
-		    return IS(T::TypeIdClass());
+			return Is(T::TypeIdClass());
 		}
 
 		template<typename T>
