@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Level/Level.h"
 #include "Interface/ICanPlayerMove.h"
@@ -12,13 +12,21 @@ class SokobanLevel
 public:
 	SokobanLevel();
 
+	// ì´ë²¤íŠ¸ í•¨ìˆ˜ ì˜¤ë²„ë¼ì´ë“œ.
+	virtual void Draw() override;
 private:
 
-	// °ÔÀÓ¿¡¼­ »ç¿ëÇÒ ¸ÊÀ» ·ÎµåÇÏ´Â ÇÔ¼ö.
+	// ê²Œì„ì—ì„œ ì‚¬ìš©í•  ë§µì„ ë¡œë“œí•˜ëŠ” í•¨ìˆ˜.
 	void LoadMap(const char* filename);
 
 	// Inherited via ICanPlayerMove
 	virtual bool CanMove(
 		const Wanted::Vector2& playerPosition, 
 		const Wanted::Vector2& nextPosition) override;
+	bool CheckGameClear();
+private:
+    //íšë“í•´ì•¼í•˜ëŠ” ëª©í‘œ ì ìˆ˜.
+    int targetScore = 0;
+    bool isGameClear = false;
+    int currStage = 0;
 };
