@@ -1,97 +1,107 @@
-Ôªø#include "ScreenBuffer.h"
+#include "ScreenBuffer.h"
 #include <iostream>
+#include "Renderer.h"
+
 namespace Wanted
 {
-    ScreenBuffer::ScreenBuffer(const Vector2& screenSize)
-	: screenSize(screenSize)
-    {
-	// Console Output ÏÉùÏÑ±.
-	buffer = CreateConsoleScreenBuffer(
-	    GENERIC_READ | GENERIC_WRITE,
-	    FILE_SHARE_READ | FILE_SHARE_WRITE,
-	    nullptr,
-	    CONSOLE_TEXTMODE_BUFFER,
-	    nullptr
-	);
-
-	// ÏòàÏô∏ Ï≤òÎ¶¨.
-	if (buffer == INVALID_HANDLE_VALUE)
+	ScreenBuffer::ScreenBuffer(const Vector2& screenSize)
+		: screenSize(screenSize)
 	{
-	    MessageBoxA(
-		nullptr,
-		"ScreenBuffer - Failed to create buffer.",
-		"Buffer creation error",
-		MB_OK
-	    );
-	    __debugbreak();
+		// Console Output ª˝º∫.
+		buffer = CreateConsoleScreenBuffer(
+			GENERIC_READ | GENERIC_WRITE,
+			FILE_SHARE_READ | FILE_SHARE_WRITE,
+			nullptr,
+			CONSOLE_TEXTMODE_BUFFER,
+			nullptr
+		);
+
+		// øπø‹ √≥∏Æ.
+		if (buffer == INVALID_HANDLE_VALUE)
+		{
+			MessageBoxA(
+				nullptr,
+				"ScreenBuffer - Failed to create buffer.",
+				"Buffer creation error",
+				MB_OK
+			);
+			__debugbreak();
+		}
+
+		// ƒ‹º÷ √¢ ≈©±‚ ¡ˆ¡§.
+		SMALL_RECT rect;
+		rect.Left = 0;
+		rect.Top = 0;
+		rect.Right = static_cast<short>(screenSize.x - 1);
+		rect.Bottom = static_cast<short>(screenSize.y - 1);
+
+		if (!SetConsoleWindowInfo(buffer, true, &rect))
+		{
+			//DWORD errorCode = GetLastError();
+			std::cerr << "Failed to set console window info.\n";
+			__debugbreak();
+		}
+
+		// πˆ∆€ ≈©±‚ º≥¡§.
+		if (!SetConsoleScreenBufferSize(buffer, screenSize))
+		{
+			std::cerr << "Failed to set console buffer size.\n";
+			__debugbreak();
+		}
+
+		// ƒøº≠ ≤Ù±‚.
+		CONSOLE_CURSOR_INFO info;
+		GetConsoleCursorInfo(buffer, &info);
+
+		// ≤Ùµµ∑œ º≥¡§.
+		info.bVisible = false;
+		SetConsoleCursorInfo(buffer, &info);
 	}
 
-	// ÏΩòÏÜî Ï∞Ω ÌÅ¨Í∏∞ ÏßÄÏ†ï.
-	SMALL_RECT rect;
-	rect.Left = 0;
-	rect.Top = 0;
-	rect.Right = static_cast<short>(screenSize.x - 1);
-	rect.Bottom = static_cast<short>(screenSize.y - 1);
-
-	if (!SetConsoleWindowInfo(buffer, true, &rect))
+	ScreenBuffer::~ScreenBuffer()
 	{
-	    //DWORD errorCode = GetLastError();
-	    std::cerr << "Failed to set console window info.\n";
-	    __debugbreak();
+		// πˆ∆€ «ÿ¡¶.
+		if (buffer)
+		{
+			CloseHandle(buffer);
+		}
 	}
 
-	// Î≤ÑÌçº ÌÅ¨Í∏∞ ÏÑ§Ï†ï.
-	if (!SetConsoleScreenBufferSize(buffer, screenSize))
+	void ScreenBuffer::Clear()
 	{
-	    std::cerr << "Failed to set console buffer size.\n";
-	    __debugbreak();
+		// Ω«¡¶∑Œ »≠∏È¿ª ¡ˆøÏ∞Ì ≥≠ µ⁄ø° 
+		// ∏Ó ±€¿⁄∏¶ ΩË¥¬¡ˆ π›»Ø πﬁ¥¬µ• ªÁøÎ.
+		DWORD writtenCount = 0;
+
+		// ƒ‹º÷ πˆ∆€ø° ¿÷¥¬ »≠∏È ¡ˆøÏ±‚.
+		// ±◊∑°«»Ω∫ -> ¡ˆøÏ±‚ -> «— ªˆªÛ(∂«¥¬ ∞™)¿∏∑Œ µ§æÓæ≤±‚.
+		FillConsoleOutputCharacterA(
+			buffer,
+			' ',
+			screenSize.x * screenSize.y,
+			Vector2::Zero,
+			&writtenCount
+		);
 	}
 
-	// Ïª§ÏÑú ÎÅÑÍ∏∞.
-	CONSOLE_CURSOR_INFO info;
-	GetConsoleCursorInfo(buffer, &info);
+	
 
-	// ÎÅÑÎèÑÎ°ù ÏÑ§Ï†ï.
-	info.bVisible = false;
-	SetConsoleCursorInfo(buffer, &info);
-    }
-    ScreenBuffer::~ScreenBuffer()
-    {
-        if (buffer)
-        {
-            CloseHandle(buffer);
-        }
-    }
-    void ScreenBuffer::Clear()
-    {
-	// Ïã§Ï†úÎ°ú ÌôîÎ©¥ÏùÑ ÏßÄÏö∞Í≥† ÎÇú Îí§Ïóê Î™á Í∏ÄÏûêÎ•º ÏçºÎäîÏßÄ Î∞òÌôò Î∞õÎäîÎç∞ ÏÇ¨Ïö©.
-	DWORD writtenCount = 0;
-	// ÏΩòÏÜî Î≤ÑÌçºÏóê ÏûàÎäî ÌôîÎ©¥ ÏßÄÏö∞Í∏∞.
-	// Í∑∏ÎûòÌîΩÏä§ -> ÏßÄÏö∞Í∏∞ -> Ìïú ÏÉâÏÉÅ(ÎòêÎäî Í∞í)ÏúºÎ°ú ÎçÆÏñ¥Ïì∞Í∏∞.
-	FillConsoleOutputCharacterA(
-	    buffer,
-	    ' ',
-	    screenSize.x * screenSize.y,
-	    Vector2::Zero,
-	    &writtenCount
-	);
-    }
-    void ScreenBuffer::Draw(CHAR_INFO* charInfo)
-    {
-	// ÏÑ§Ï†ïÌï† Î≤ÑÌçºÏùò ÌÅ¨Í∏∞
-	SMALL_RECT writeRegion = {};
-	writeRegion.Left = 0;
-	writeRegion.Top = 0;
-	writeRegion.Right = static_cast<short>(screenSize.x - 1);
-	writeRegion.Bottom= static_cast<short>(screenSize.x - 1);
+	void ScreenBuffer::Draw(CHAR_INFO* charInfo)
+	{
+		// º≥¡§«“ πˆ∆€¿« ≈©±‚
+		SMALL_RECT writeRegion = {};
+		writeRegion.Left = 0;
+		writeRegion.Top = 0;
+		writeRegion.Right = static_cast<short>(screenSize.x - 1);
+		writeRegion.Bottom = static_cast<short>(screenSize.y - 1);
 
-	// Î≤ÑÌçºÏóê Ï†ÑÎã¨ Î∞õÏùÄ Í∏ÄÏûê Î∞∞Ïó¥ ÏÑ§Ï†ï.
-	WriteConsoleOutputA(
-	    buffer,
-	    charInfo,
-	    screenSize,
-	    Vector2::Zero,
-	    &writeRegion
-	);
-    }
+		// πˆ∆€ø° ¿¸¥ﬁ πﬁ¿∫ ±€¿⁄ πËø≠ º≥¡§.
+		WriteConsoleOutputA(
+			buffer,
+			charInfo,
+			screenSize,
+			Vector2::Zero,
+			&writeRegion
+		);
+	}
 }

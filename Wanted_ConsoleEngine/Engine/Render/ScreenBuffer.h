@@ -1,35 +1,35 @@
-ï»¿#pragma once
+#pragma once
 
 #include "Math/Vector2.h"
 #include <Windows.h>
 
 namespace Wanted
 {
-    /*
-    * ì‘ì„±ì : 
-    * ë‚ ì§œ   : 2026.02.03
-    * ë‚´ìš©   : ë”ë¸” ë²„í¼ë§ì— ì‚¬ìš©í•  Console Output í•¸ë“¤ì„ ê´€ë¦¬í•˜ëŠ” í´ë˜ìŠ¤.
-    */
-    class ScreenBuffer
-    {
-    public:
-	ScreenBuffer(const Vector2& screenSize);
-	~ScreenBuffer();
+	/*
+	* ÀÛ¼ºÀÚ : Àå¼¼À±
+	* ³¯Â¥   : 2026.02.03
+	* ³»¿ë   : ´õºí ¹öÆÛ¸µ¿¡ »ç¿ëÇÒ Console Output ÇÚµéÀ» °ü¸®ÇÏ´Â Å¬·¡½º.
+	*/
+	class ScreenBuffer
+	{
+	public:
+		ScreenBuffer(const Vector2& screenSize);
+		~ScreenBuffer();
 
-	// ì½˜ì†” ë²„í¼ë¥¼ ì§€ìš°ëŠ” í•¨ìˆ˜.
-	void Clear();
+		// ÄÜ¼Ö ¹öÆÛ¸¦ Áö¿ì´Â ÇÔ¼ö.
+		void Clear();
 
-	// ì½˜ì†”ì— 2ì°¨ì› ê¸€ì ë°°ì—´ì„ ê·¸ë¦´ ë•Œ ì‚¬ìš©í•˜ëŠ” í•¨ìˆ˜.
-	void Draw(CHAR_INFO* charInfo);
+		// ÄÜ¼Ö¿¡ 2Â÷¿ø ±ÛÀÚ ¹è¿­À» ±×¸± ¶§ »ç¿ëÇÏ´Â ÇÔ¼ö.
+		void Draw(CHAR_INFO* charInfo);
 
-	// ë²„í¼ ë°˜í™˜ Getter.
-	inline HANDLE GetBuffer() const { return buffer; }
+		// ¹öÆÛ ¹İÈ¯ Getter.
+		inline HANDLE GetBuffer() const { return buffer; }
 
-    private:
-	// ì½˜ì†” ì¶œë ¥ í•¸ë“¤.
-	HANDLE buffer = nullptr;
+	private:
+		// ÄÜ¼Ö Ãâ·Â ÇÚµé.
+		HANDLE buffer = nullptr;
 
-	// í™”ë©´ í¬ê¸°.
-	Vector2 screenSize;
-    };
+		// È­¸é Å©±â.
+		Vector2 screenSize;
+	};
 }

@@ -1,4 +1,4 @@
-ï»¿#include "Actor.h"
+#include "Actor.h"
 #include "Util/Util.h"
 #include "Render/Renderer.h"
 
@@ -11,23 +11,23 @@ namespace Wanted
 		const char* image, 
 		const Vector2& position,
 		Color color)
-		:position(position), color(color)
+		: position(position), color(color)
 	{
-	    // ë¬¸ìì—´ ë³µì‚¬. (RAII)
-	    size_t length = strlen(image) + 1;  // ë¬¸ìì—´ì˜ ê¸¸ì´ë¥¼ êµ¬í•˜ê³  ë„ ì¢…ë£Œ ë¬¸ì í¬ê¸°ë¥¼ ì¶”ê°€
-	    this->image = new char[length];      // ë¬¸ìì—´ì„ ì €ì¥í•  ë©”ëª¨ë¦¬ ë™ì  í• ë‹¹
-	    strcpy_s(this->image, length, image); // ì•ˆì „í•˜ê²Œ ë¬¸ìì—´ì„ ë³µì‚¬
-
+		// ¹®ÀÚ¿­ º¹»ç.
+		size_t length = strlen(image) + 1;
+		this->image = new char[length];
+		strcpy_s(this->image, length, image);
 	}
 
 	Actor::~Actor()
 	{
-	    SafeDeleteArray(image);
+		// ¸Ş¸ğ¸® ÇØÁ¦.
+		SafeDeleteArray(image);
 	}
 
 	void Actor::BeginPlay()
 	{
-		// ì´ë²¤íŠ¸ë¥¼ ë°›ì€ í›„ì—ëŠ” í”Œë˜ê·¸ ì„¤ì •.
+		// ÀÌº¥Æ®¸¦ ¹ŞÀº ÈÄ¿¡´Â ÇÃ·¡±× ¼³Á¤.
 		hasBeganPlay = true;
 	}
 
@@ -38,20 +38,23 @@ namespace Wanted
 	void Actor::Draw()
 	{
 		//Renderer::Draw(position, color, image);
-		// ë Œë”ëŸ¬ì— ë°ì´í„° ì œì¶œ.
-	    Renderer::Get().Submit(image, position, color, sortingOrder);
-		
+
+		// ·»´õ·¯¿¡ µ¥ÀÌÅÍ Á¦Ãâ.
+		Renderer::Get().Submit(image, position, color, sortingOrder);
 	}
 
 	void Actor::SetPosition(const Vector2& newPosition)
 	{
-		// ë Œë”ëŸ¬ì— ë¹ˆì¹¸ ê·¸ë¦¬ê¸° ìš”ì²­.
+		// ·»´õ·¯¿¡ ºóÄ­ ±×¸®±â ¿äÃ».
 		//Renderer::Draw(position, ' ');
 
-	    if (position == newPosition)
-		return;
+		// º¯°æÇÏ·Á´Â À§Ä¡°¡ ÇöÀç À§Ä¡¿Í °°À¸¸é °Ç³Ê²ñ.
+		if (position == newPosition)
+		{
+			return;
+		}
 
-		// ìƒˆë¡œìš´ ìœ„ì¹˜ ì„¤ì •.
+		// »õ·Î¿î À§Ä¡ ¼³Á¤.
 		position = newPosition;
 	}
 }

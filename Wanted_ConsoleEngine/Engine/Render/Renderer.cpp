@@ -1,205 +1,226 @@
-ï»¿#include "Renderer.h"
+#include "Renderer.h"
 #include "ScreenBuffer.h"
 #include "Util/Util.h"
 
 namespace Wanted
 {
-    Renderer::Frame::Frame(int bufferCount)
-    {
-	// ë°°ì—´ ìƒì„± ë° ì´ˆê¸°í™”.
-	charInfoArray = new CHAR_INFO[bufferCount];
-	memset(charInfoArray, 0, sizeof(CHAR_INFO) * bufferCount);
-
-	sortingOrderArray = new int[bufferCount];
-	memset(sortingOrderArray, 0, sizeof(int) * bufferCount);
-    }
-
-    Renderer::Frame::~Frame()
-    {
-	SafeDeleteArray(charInfoArray);
-	SafeDeleteArray(sortingOrderArray);
-    }
-
-    void Renderer::Frame::Clear(const Vector2& screenSize)
-    {
-	// 2ì°¨ì› ë°°ì—´ë¡œ ë‹¤ë£¨ëŠ” 1ì°¨ì› ë°°ì—´ì„ ìˆœíšŒí•˜ë©´ì„œ
-	// ë¹ˆ ë¬¸ì(' ')ë¥¼ ì„¤ì •.
-	const int width = screenSize.x;
-	const int height = screenSize.y;
-
-	for (int y = 0; y < height; ++y)
+	Renderer::Frame::Frame(int bufferCount)
 	{
-	    for (int x = 0; x < width; ++x)
-	    {
-		// ë°°ì—´ ì¸ë±ìŠ¤ êµ¬í•˜ê¸°.
-		const int index = (y * width) + x;
+		// ¹è¿­ »ı¼º ¹× ÃÊ±âÈ­.
+		charInfoArray = new CHAR_INFO[bufferCount];
+		memset(charInfoArray, 0, sizeof(CHAR_INFO) * bufferCount);
 
-		// ê¸€ì ê°’ ë° ì†ì„± ì„¤ì •.
-		CHAR_INFO& info = charInfoArray[index];
-		info.Char.AsciiChar = ' ';
-		info.Attributes = 0;
-
-		// ê·¸ë¦¬ê¸° ìš°ì„ ìˆœìœ„ ì´ˆê¸°í™”.
-		sortingOrderArray[index] = -1;
-	    }
-	}
-    }
-
-    // -------------- Frame -------------- //
-
-    Renderer* Renderer::instance = nullptr; // static ë³€ìˆ˜ ì™¸ë¶€ ì´ˆê¸°í™”
-
-    Renderer& Renderer::Get()
-    {
-	if (!instance)
-	{
-	    MessageBoxA(nullptr, "Renderer::Get() - instance is null", "Error", MB_OK);
-	    __debugbreak();
-	}
-	return *instance;
-    }
-
-    Renderer::Renderer(const Vector2& screenSize)
-	: screenSize(screenSize)
-    {
-	instance = this;
-
-	// í”„ë ˆì„ ê°ì²´ ìƒì„±.
-	const int bufferCount = screenSize.x * screenSize.y;
-	frame = new Frame(bufferCount);
-
-	// í”„ë ˆì„ ì´ˆê¸°í™”
-	frame->Clear(screenSize);
-
-	// ì´ì¤‘ ë²„í¼ ê°ì²´ ìƒì„±.
-	screenBuffers[0] = new ScreenBuffer(screenSize);
-	screenBuffers[0]->Clear();
-
-	screenBuffers[1] = new ScreenBuffer(screenSize);
-	screenBuffers[1]->Clear();
-
-	// í™œì„±í™” ë²„í¼ ì„¤ì •.
-	Present();
-    }
-
-    Renderer::~Renderer()
-    {
-	SafeDelete(frame);
-	for (ScreenBuffer*& buffer : screenBuffers)
-	{
-	    SafeDelete(buffer);
-	}
-    }
-
-
-    void Renderer::Draw()
-    {
-	//// í™”ë©´ ì§€ìš°ê¸°.
-	//Clear();
-
-	//// ì „ì œì¡°ê±´: ë ˆë²¨ì˜ ëª¨ë“  ì•¡í„°ê°€ ë Œë”ëŸ¬ì— submitì„ ì™„ë£Œ.
-	//// ë Œë”í ìˆœíšŒí•˜ë©´ì„œ ì±„ìš°ê¸°.
-	//for (const RenderCommand& command : renderQueue)
-	//{
-	//    // í™”ë©´ì— ê·¸ë¦´ í…ìŠ¤íŠ¸ê°€ ì—†ìœ¼ë©´ ê±´ë„ˆ ëœ€.
-	//    if (!command.text)
-	//	continue;
-
-	//    // ì„¸ë¡œ ê¸°ì¤€ í™”ë©´ ë²—ì–´ë‚¬ëŠ”ì§€ í™•ì¸.
-	//    if (command.position.y < 0 || command.position.y >= screenSize.y)
-	//	continue;
-
-	//    // í™”ë©´ì— ê·¸ë¦´ ë¬¸ìì—´ ê¸¸ì´
-	//    const int length = static_cast<int>(strlen(command.text));
-
-	//    if (length <= 0)
-	//	continue;
-
-	//    // xì¢Œí‘œ ê¸°ì¤€ìœ¼ë¡œ í™”ë©´ì—ì„œ ë²—ì–´ë‚¬ëŠ”ì§€ í™•ì¸.
-	//    const int startX = command.position.x;
-	//    const int endX = command.position.x + length - 1;
-
-	//    if (endX < 0 || startX >= screenSize.x)
-	//	continue;
-	//    
-	//    // ì‹œì‘ ìœ„ì¹˜.
-	//    const int visibleStart = startX < 0 ? 0 : startX;
-	//    const int visibleEnd = endX >= screenSize.x ? screenSize.x - 1 : endX;
-
-	//    // ë¬¸ìì—´ì„ í‘œì‹œí•˜ëŠ” ë²”ìœ„ë¥¼ ì„¤ì •í•˜ëŠ” ë°˜ë³µë¬¸.
-	//    for (int x = visibleStart; x <= visibleEnd; ++x)
-	//    {
-	//	// ì›ë³¸ í…ìŠ¤íŠ¸ì—ì„œì˜ í•´ë‹¹ ë¬¸ì ì¸ë±ìŠ¤ë¥¼ ê³„ì‚°.
-	//	const int sourceIndex = x - startX;
-
-	//	// í”„ë ˆì„ (2ì°¨ì› ë¬¸ì ë°°ì—´) ì¸ë±ìŠ¤.
-	//	const int index = (command.position.y * screenSize.x) + x;
-
-	//	// ê·¸ë¦¬ê¸° ìš°ì„ ìˆœìœ„ ë¹„êµ.
-	//	if (frame->sortingOrderArray[index] > command.sortingOrder)
-	//	    continue;
-
-	//	// ë°ì´í„° ê¸°ë¡.
-	//	frame->charInfoArray[index].Char.AsciiChar = command.text[sourceIndex];
-	//	frame->charInfoArray[index].Attributes = (WORD)command.color;
-	//    }
-	//
-	//}
-
-	//// ê·¸ë¦¬ê¸°.
-	//GetCurrentBuffer()->Draw(frame->charInfoArray);
-	//
-
-	//// ë²„í¼ êµí™˜.
-	//Present();
-
-	//// ë Œë” í ë¹„ìš°ê¸°.
-	//renderQueue.clear();
-
-	// ì•¡í„° ìˆœíšŒí•˜ë©´ì„œ Draw í•¨ìˆ˜ í˜¸ì¶œ.
-	for (Actor* const actor : actors)
-	{
-	    if (!actor->isActive())
-		continue;
-	    actor->Draw();
+		sortingOrderArray = new int[bufferCount];
+		memset(sortingOrderArray, 0, sizeof(int) * bufferCount);
 	}
 
-    }
+	Renderer::Frame::~Frame()
+	{
+		SafeDeleteArray(charInfoArray);
+		SafeDeleteArray(sortingOrderArray);
+	}
 
-    void Renderer::Submit(const char* text, const Vector2& position, Color color, int sortingOrder)
-    {
-	// ë Œë” ë°ì´í„° ìƒì„± í›„ íì— ì¶”ê°€.
-	RenderCommand command = {};
-	command.text = text;
-	command.position = position;
-	command.color= color;
-	command.sortingOrder = sortingOrder;
+	void Renderer::Frame::Clear(const Vector2& screenSize)
+	{
+		// 2Â÷¿ø ¹è¿­·Î ´Ù·ç´Â 1Â÷¿ø ¹è¿­À» ¼øÈ¸ÇÏ¸é¼­
+		// ºó ¹®ÀÚ(' ')¸¦ ¼³Á¤.
+		const int width = screenSize.x;
+		const int height = screenSize.y;
 
-	renderQueue.emplace_back(command);
-    }
+		for (int y = 0; y < height; ++y)
+		{
+			for (int x = 0; x < width; ++x)
+			{
+				// ¹è¿­ ÀÎµ¦½º ±¸ÇÏ±â.
+				const int index = (y * width) + x;
 
-    void Renderer::Clear()
-    {
-	// í™”ë©´ ì§€ìš°ê¸°.
-	// 1. í”„ë ˆì„(2ì°¨ì› ë°°ì—´ ë°ì´í„°) ì§€ìš°ê¸°.
-	frame->Clear(screenSize);
+				// ±ÛÀÚ °ª ¹× ¼Ó¼º ¼³Á¤.
+				CHAR_INFO& info = charInfoArray[index];
+				info.Char.AsciiChar = ' ';
+				info.Attributes = 0;
 
-	// 2. ì½˜ì†” ë²„í¼ ì§€ìš°ê¸°
-	GetCurrentBuffer()->Clear();
-    }
+				// ±×¸®±â ¿ì¼±¼øÀ§ ÃÊ±âÈ­.
+				sortingOrderArray[index] = -1;
+			}
+		}
+	}
 
-    void Renderer::Present()
-    {
-	// ë²„í¼ êµí™˜.
-	SetConsoleActiveScreenBuffer(GetCurrentBuffer()->GetBuffer());
+	// -------------- Frame -------------- //
 
-	// ì¸ë±ìŠ¤ êµì²´.
-	currentBufferIndex = 1 - currentBufferIndex;
-    }
+	// Á¤Àû º¯¼ö ÃÊ±âÈ­.
+	Renderer* Renderer::instance = nullptr;
 
-    ScreenBuffer* Renderer::GetCurrentBuffer()
-    {
-	return screenBuffers[currentBufferIndex];
-    }
+	Renderer::Renderer(const Vector2& screenSize)
+		: screenSize(screenSize)
+	{
+		instance = this;
 
+		// ÇÁ·¹ÀÓ °´Ã¼ »ı¼º.
+		const int bufferCount = screenSize.x * screenSize.y;
+		frame = new Frame(bufferCount);
+
+		// ÇÁ·¹ÀÓ ÃÊ±âÈ­.
+		frame->Clear(screenSize);
+
+		// ÀÌÁß ¹öÆÛ °´Ã¼ »ı¼º ¹× ÃÊ±âÈ­.
+		screenBuffers[0] = new ScreenBuffer(screenSize);
+		screenBuffers[0]->Clear();
+
+		screenBuffers[1] = new ScreenBuffer(screenSize);
+		screenBuffers[1]->Clear();
+
+		// È°¼ºÈ­ ¹öÆÛ ¼³Á¤.
+		Present();
+	}
+
+	Renderer::~Renderer()
+	{
+		SafeDelete(frame);
+		for (ScreenBuffer*& buffer : screenBuffers)
+		{
+			SafeDelete(buffer);
+		}
+	}
+
+	void Renderer::Draw()
+	{
+		// È­¸é Áö¿ì±â.
+		Clear();
+
+		// ÀüÁ¦Á¶°Ç: ·¹º§ÀÇ ¸ğµç ¾×ÅÍ°¡ ·»´õ·¯¿¡ SubmitÀ» ¿Ï·á.
+		// ·»´õÅ¥ ¼øÈ¸ÇÏ¸é¼­ ÇÁ·¹ÀÓ Ã¤¿ì±â.
+		for (const RenderCommand& command : renderQueue)
+		{
+			// È­¸é¿¡ ±×¸± ÅØ½ºÆ®°¡ ¾øÀ¸¸é °Ç³Ê¶Ü.
+			if (!command.text)
+			{
+				continue;
+			}
+
+			// ¼¼·Î ±âÁØ È­¸é ¹ş¾î³µ´ÂÁö È®ÀÎ.
+			if (command.position.y < 0
+				|| command.position.y >= screenSize.y)
+			{
+				continue;
+			}
+
+			// È­¸é¿¡ ±×¸± ¹®ÀÚ¿­ ±æÀÌ.
+			const int length = static_cast<int>(strlen(command.text));
+
+			// ¾È±×·Áµµ µÇ¸é °Ç³Ê¶Ü.
+			if (length <= 0)
+			{
+				continue;
+			}
+
+			// xÁÂÇ¥ ±âÁØÀ¸·Î È­¸é¿¡¼­ ¹ş¾î³µ´ÂÁö È®ÀÎ.
+			// À§Ä¡´Â ¿ŞÂÊ ±âÁØ: "abcde"
+			const int startX = command.position.x;
+			const int endX = command.position.x + length - 1;
+
+			if (endX < 0 || startX >= screenSize.x)
+			{
+				continue;
+			}
+
+			// ½ÃÀÛ À§Ä¡.
+			const int visibleStart = startX < 0 ? 0 : startX;
+			const int visibleEnd
+				= endX >= screenSize.x ? screenSize.x - 1 : endX;
+
+			// ¹®ÀÚ¿­ ¼³Á¤.
+			for (int x = visibleStart; x <= visibleEnd; ++x)
+			{
+				// ¹®ÀÚ¿­ ¾ÈÀÇ ¹®ÀÚ ÀÎµ¦½º.
+				const int sourceIndex = x - startX;
+
+				// ÇÁ·¹ÀÓ (2Â÷¿ø ¹®ÀÚ ¹è¿­) ÀÎµ¦½º.
+				const int index
+					= (command.position.y * screenSize.x) + x;
+
+				// ±×¸®±â ¿ì¼±¼øÀ§ ºñ±³.
+				if (frame->sortingOrderArray[index]
+					> command.sortingOrder)
+				{
+					continue;
+				}
+
+				// µ¥ÀÌÅÍ ±â·Ï.
+				frame->charInfoArray[index].Char.AsciiChar
+					= command.text[sourceIndex];
+				frame->charInfoArray[index].Attributes
+					= (WORD)command.color;
+
+				// ¿ì¼±¼øÀ§ ¾÷µ¥ÀÌÆ®.
+				frame->sortingOrderArray[index]
+					= command.sortingOrder;
+			}
+		}
+
+		// ±×¸®±â.
+		GetCurrentBuffer()->Draw(frame->charInfoArray);
+
+		// ¹öÆÛ ±³È¯.
+		Present();
+
+		// ·»´õ Å¥ ºñ¿ì±â.
+		renderQueue.clear();
+	}
+
+	Renderer& Renderer::Get()
+	{
+		if (!instance)
+		{
+			MessageBoxA(
+				nullptr,
+				"Renderer::Get() - instance is null",
+				"Error",
+				MB_OK
+			);
+
+			__debugbreak();
+		}
+
+		return *instance;
+	}
+
+	void Renderer::Clear()
+	{
+		// È­¸é Áö¿ì±â.
+		// 1. ÇÁ·¹ÀÓ(2Â÷¿ø ¹è¿­ µ¥ÀÌÅÍ) Áö¿ì±â.
+		frame->Clear(screenSize);
+
+		// 2. ÄÜ¼Ö ¹öÆÛ Áö¿ì±â.
+		GetCurrentBuffer()->Clear();
+	}
+
+	void Renderer::Submit(
+		const char* text,
+		const Vector2& position,
+		Color color,
+		int sortingOrder)
+	{
+		// ·»´õ µ¥ÀÌÅÍ »ı¼º ÈÄ Å¥¿¡ Ãß°¡.
+		RenderCommand command = {};
+		command.text = text;
+		command.position = position;
+		command.color = color;
+		command.sortingOrder = sortingOrder;
+
+		renderQueue.emplace_back(command);
+	}
+
+	void Renderer::Present()
+	{
+		// ¹öÆÛ ±³È¯.
+		SetConsoleActiveScreenBuffer(GetCurrentBuffer()->GetBuffer());
+
+		// ÀÎµ¦½º ±³Ã¼.
+		currentBufferIndex = 1 - currentBufferIndex;
+	}
+
+	ScreenBuffer* Renderer::GetCurrentBuffer()
+	{
+		return screenBuffers[currentBufferIndex];
+	}
 }

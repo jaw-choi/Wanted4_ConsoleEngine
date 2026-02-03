@@ -1,14 +1,14 @@
-ï»¿#pragma once
+#pragma once
 
 #include "Math/Vector2.h"
 #include "Math/Color.h"
 
 using namespace Wanted;
 
-// í—¬í¼(Helper) ê¸°ëŠ¥ ì œê³µ.
+// ÇïÆÛ(Helper) ±â´É Á¦°ø.
 namespace Util
 {
-	// ì½˜ì†” ì»¤ì„œ ìœ„ì¹˜ ì´ë™(ì„¤ì •)í•˜ëŠ” í•¨ìˆ˜.
+	// ÄÜ¼Ö Ä¿¼­ À§Ä¡ ÀÌµ¿(¼³Á¤)ÇÏ´Â ÇÔ¼ö.
 	inline void SetConsolePosition(const Vector2& position)
 	{
 		SetConsoleCursorPosition(
@@ -17,7 +17,7 @@ namespace Util
 		);
 	}
 
-	// ì½˜ì†” í…ìŠ¤íŠ¸ ì„¤ì • í•¨ìˆ˜.
+	// ÄÜ¼Ö ÅØ½ºÆ® ¼³Á¤ ÇÔ¼ö.
 	inline void SetConsoleTextColor(Color color)
 	{
 		SetConsoleTextAttribute(
@@ -26,10 +26,10 @@ namespace Util
 		);
 	}
 
-	// ì»¤ì„œ ë„ê¸°.
+	// Ä¿¼­ ²ô±â.
 	inline void TurnOffCursor()
 	{
-		// ì»¤ì„œ ë„ê¸°.
+		// Ä¿¼­ ²ô±â.
 		CONSOLE_CURSOR_INFO info = {};
 		GetConsoleCursorInfo(
 			GetStdHandle(STD_OUTPUT_HANDLE),
@@ -43,10 +43,10 @@ namespace Util
 		);
 	}
 
-	// ì»¤ì„œ ì¼œê¸°.
+	// Ä¿¼­ ÄÑ±â.
 	inline void TurnOnCursor()
 	{
-		// ì»¤ì„œ ë„ê¸°.
+		// Ä¿¼­ ²ô±â.
 		CONSOLE_CURSOR_INFO info = {};
 		GetConsoleCursorInfo(
 			GetStdHandle(STD_OUTPUT_HANDLE),
@@ -61,30 +61,23 @@ namespace Util
 	}
 }
 
-
-// ë©”ëª¨ë¦¬ ì •ë¦¬ í•¨ìˆ˜.
-
+// ¸Ş¸ğ¸® Á¤¸® ÇÔ¼ö.
 template<typename T>
 void SafeDelete(T*& t)
 {
-    if (t)
-    {
-	delete t;
-	t = nullptr;
-    }
+	if (t)
+	{
+		delete t;
+		t = nullptr;
+	}
 }
-
 
 template<typename T>
 void SafeDeleteArray(T*& t)
 {
-    if (t)
-    {
-	delete[] t;
-	t = nullptr;
-    }
+	if (t)
+	{
+		delete[] t;
+		t = nullptr;
+	}
 }
-
-
-
-

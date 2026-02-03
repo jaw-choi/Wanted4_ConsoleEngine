@@ -1,8 +1,8 @@
-ï»¿#include "Wall.h"
+#include "Wall.h"
 
 Wall::Wall(const Vector2& position)
-	: super("#", position, Color::White)
+	: super('#', position, Color::White)
 {
-	// ê·¸ë¦¬ê¸° ìš°ì„ ìˆœìœ„ ì„¤ì •.
+	// ±×¸®±â ¿ì¼±¼øÀ§ ¼³Á¤.
 	sortingOrder = 0;
 }

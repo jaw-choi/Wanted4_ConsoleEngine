@@ -1,67 +1,71 @@
-Ôªø#include "Game.h"
+#include "Game.h"
 #include "Level/SokobanLevel.h"
 #include "Level/MenuLevel.h"
 
 #include <iostream>
 
-//Ï†ïÏ†Å Î≥ÄÏàò Ï¥àÍ∏∞Ìôî
+// ¡§¿˚ ∫Øºˆ √ ±‚»≠.
 Game* Game::instance = nullptr;
 
 Game::Game()
 {
-    instance = this;
+	instance = this;
 
-    // Îëê Î†àÎ≤® ÏÉùÏÑ± Î∞è Î∞∞Ïó¥Ïóê Ï∂îÍ∞Ä.
-    levels.emplace_back(new SokobanLevel());
-    levels.emplace_back(new MenuLevel());
+	// µŒ ∑π∫ß ª˝º∫ π◊ πËø≠ø° √ﬂ∞°.
+	levels.emplace_back(new SokobanLevel());
+	levels.emplace_back(new MenuLevel());
 
-    // ÏãúÏûë ÏÉÅÌÉú(Î†àÎ≤®) ÏÑ§Ï†ï.
-    state = State::GamePlay;
+	// Ω√¿€ ªÛ≈¬(∑π∫ß) º≥¡§.
+	state = State::GamePlay;
 
-    // Í≤åÏûÑ ÏãúÏûë Ïãú ÌôúÏÑ±Ìôî Ìï† Î†àÎ≤® ÏÑ§Ï†ï.
-    mainLevel = levels[0];
+	// ∞‘¿” Ω√¿€ Ω√ »∞º∫»≠«“ ∑π∫ß º≥¡§.
+	mainLevel = levels[0];
 }
 
 Game::~Game()
 {
-    // Ï§ëÎ≥µ Ï†úÍ±∞ Î∞©ÏßÄ.
-    mainLevel = nullptr;
+	// ¡ﬂ∫π ¡¶∞≈ πÊ¡ˆ.
+	mainLevel = nullptr;
 
-    // Î™®Îì† Î†àÎ≤® ÏÇ≠Ï†ú.
-    for (Level*& level : levels)//Ìè¨Ïù∏ÌÑ∞Ïù∏Îç∞ Ï£ºÏÜåÎ≥µÏÇ¨ÎêòÎäî Ìè¨Ïù∏ÌÑ∞
-    {
-        delete level;
-        level = nullptr;
-    }
+	// ∏µÁ ∑π∫ß ªË¡¶.
+	for (Level*& level : levels)
+	{
+		delete level;
+		level = nullptr;
+	}
 
-    levels.clear();
+	// πËø≠ ¡§∏Æ.
+	levels.clear();
 }
 
 void Game::ToggleMenu()
 {
-    // ÌôîÎ©¥ ÏßÄÏö∞Í∏∞.
-    // systemÏùÄ ÏΩòÏÜî Î™ÖÎ†πÏñ¥ Ïã§Ìñâ Ìï®Ïàò. "cls" Î™ÖÎ†πÏñ¥ Ïã§Ìñâ.
-    system("cls");
+	// »≠∏È ¡ˆøÏ±‚.
+	// system¿∫ ƒ‹º÷ ∏Ì∑…æÓ Ω««‡ «‘ºˆ. "cls" ∏Ì∑…æÓ Ω««‡.
+	// cls -> clear screen.
+	system("cls");
 
-    // Î≥ÄÍ≤ΩÌï† Ïù∏Îç±Ïä§ Í≥ÑÏÇ∞.
-    // ÌòÑÏû¨ ÌôúÏÑ± Î†àÎ≤® Ïù∏Îç±Ïä§Í∞Ä 1Ïù¥Î©¥ -> 0ÏúºÎ°ú.
-    // ÌòÑÏû¨ ÌôúÏÑ± Î†àÎ≤® Ïù∏Îç±Ïä§Í∞Ä 0Ïù¥Î©¥ -> 1Î°ú.
-    // ÎßàÎ≤ïÏùò Í≥µÏãù - (1-x) -> OneMinus
-    int stateIndex = (int)state;    // static_cast.
-    int nextState = 1 - stateIndex;
-    state = (State)nextState;
+	// ∫Ø∞Ê«“ ¿Œµ¶Ω∫ ∞ËªÍ.
+	// «ˆ¿Á »∞º∫ ∑π∫ß ¿Œµ¶Ω∫∞° 1¿Ã∏È -> 0¿∏∑Œ.
+	// «ˆ¿Á »∞º∫ ∑π∫ß ¿Œµ¶Ω∫∞° 0¿Ã∏È -> 1∑Œ.
+	// ∏∂π˝¿« ∞¯Ωƒ - (1-x) -> OneMinus
+	int stateIndex = (int)state;	// static_cast.
+	int nextState = 1 - stateIndex;	// one - x.
+	state = (State)nextState;		// static_cast.
 
-    mainLevel = levels[static_cast<int>(state)];
+	// ∏ﬁ¿Œ ∑π∫ß ∫Ø∞Ê.
+	mainLevel = levels[static_cast<int>(state)];
 }
 
 Game& Game::Get()
 {
-    if (!instance)
-    {
-        std::cerr << "Game::Get() - instace is null\n";
-        __debugbreak();
-    }
+	// øπø‹ √≥∏Æ.
+	if (!instance)
+	{
+		std::cerr << "Game::Get() - instance is null\n";
+		__debugbreak();
+	}
 
-    // Ï†ïÏ†Å Î≥ÄÏàò Î∞òÌôò.
-    return *instance;
+	// ¡§¿˚ ∫Øºˆ π›»Ø.
+	return *instance;
 }

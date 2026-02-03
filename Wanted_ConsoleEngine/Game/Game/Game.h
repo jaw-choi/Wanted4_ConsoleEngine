@@ -1,38 +1,37 @@
-ï»¿#pragma once
+#pragma once
 
 #include "Engine/Engine.h"
 #include <vector>
 
 using namespace Wanted;
 
-// ë ˆë²¨ ê´€ë¦¬ì— ì‚¬ìš©í•  ì—´ê±°í˜•.
+// ·¹º§ °ü¸®¿¡ »ç¿ëÇÒ ¿­°ÅÇü.
 enum class State
 {
-    //None = -1, //error check
-    GamePlay = 0,
-    Menu,
-    Length
+	//None = -1,
+	GamePlay = 0,
+	Menu = 1,
+	Length
 };
 
 class Game : public Engine
 {
 public:
-    Game();
-    ~Game();
+	Game();
+	~Game();
 
-    //ë©”ë‰´/ê²Œì„ ë ˆë²¨ì„ ì „í™˜í•˜ëŠ” í•¨ìˆ˜.
-    void ToggleMenu();
+	// ¸Ş´º/°ÔÀÓ ·¹º§À» ÀüÈ¯ÇÏ´Â ÇÔ¼ö.
+	void ToggleMenu();
 
-    static Game& Get();
+	static Game& Get();
 
 private:
-    // ê²Œì„ì—ì„œ ê´€ë¦¬í•˜ëŠ” ë ˆë²¨ì„ ì €ì¥í•˜ëŠ” ë°°ì—´
-    std::vector<Level*> levels;
+	// °ÔÀÓ¿¡¼­ °ü¸®ÇÏ´Â ·¹º§À» ÀúÀåÇÒ ¹è¿­.
+	std::vector<Level*> levels;
 
-    // í˜„ì¬ í™œì„±í™”ëœ ë ˆë²¨ì„ ë‚˜íƒ€ë‚´ëŠ” ìƒíƒœ ë³€ìˆ˜.
-    State state = State::GamePlay;
+	// ÇöÀç È°¼ºÈ­µÈ ·¹º§À» ³ªÅ¸³»´Â »óÅÂ º¯¼ö.
+	State state = State::GamePlay;
 
-    // ì‹±ê¸€í†¤ êµ¬í˜„ì„ ìœ„í•œ ì •ì  ë³€ìˆ˜.
-    static Game* instance;
+	// ½Ì±ÛÅæ ±¸ÇöÀ» À§ÇÑ Á¤Àû º¯¼ö.
+	static Game* instance;
 };
-

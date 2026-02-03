@@ -1,308 +1,314 @@
-ï»¿#include "SokobanLevel.h"
+#include "SokobanLevel.h"
 #include "Actor/Player.h"
 #include "Actor/Wall.h"
 #include "Actor/Ground.h"
 #include "Actor/Box.h"
 #include "Actor/Target.h"
 #include "Util/Util.h"
+
 #include <iostream>
 
 /*
-#: ë²½(Wall)
-.: ë°”ë‹¥(Ground)
-p: í”Œë ˆì´ì–´(Player)
-b: ë°•ìŠ¤(Box)
-t: íƒ€ê²Ÿ(Target)
+#: º®(Wall)
+.: ¹Ù´Ú(Ground)
+p: ÇÃ·¹ÀÌ¾î(Player)
+b: ¹Ú½º(Box)
+t: Å¸°Ù(Target)
 */
-
 
 SokobanLevel::SokobanLevel()
 {
-    // TestActor ì•¡í„°ë¥¼ ë ˆë²¨ì— ì¶”ê°€.
-    //AddNewActor(new Player());
-    //LoadMap("Map.txt");
-    LoadMap("Stage3.txt");
+	// TestActor ¾×ÅÍ¸¦ ·¹º§¿¡ Ãß°¡.
+	//AddNewActor(new Player());
+	//LoadMap("Map.txt");
+	LoadMap("Stage1.txt");
 }
 
 void SokobanLevel::Draw()
 {
-    super::Draw();
+	super::Draw();
 
-    if (isGameClear)
-    {
-	Util::SetConsolePosition(Vector2(30, 0));
-	Util::SetConsoleTextColor(Color::White);
+	// °ÔÀÓ Å¬¸®¾îÀÎ °æ¿ì. ¸Ş½ÃÁö Ãâ·Â.
+	if (isGameClear)
+	{
+		// ÄÜ¼Ö À§Ä¡/»ö»ó ¼³Á¤.
+		Util::SetConsolePosition(Vector2(30, 0));
+		Util::SetConsoleTextColor(Color::White);
 
-	std::cout << "Game Clear..!\n";
-    }
+		// °ÔÀÓ Å¬¸®¾î ¸Ş½ÃÁö Ãâ·Â.
+		std::cout << "Game Clear!";
+	}
 }
 
 void SokobanLevel::LoadMap(const char* filename)
 {
-    // íŒŒì¼ ë¡œë“œ.
-    // ìµœì¢… íŒŒì¼ ê²½ë¡œ ë§Œë“¤ê¸°. ("../Assets/filename")
-    char path[2048] = {};
-    sprintf_s(path, 2048, "../Assets/%s", filename);
+	// ÆÄÀÏ ·Îµå.
+	// ÃÖÁ¾ ÆÄÀÏ °æ·Î ¸¸µé±â. ("../Assets/filename")
+	char path[2048] = {};
+	sprintf_s(path, 2048, "../Assets/%s", filename);
 
-    // íŒŒì¼ ì—´ê¸°.
-    FILE* file = nullptr;
-    fopen_s(&file, path, "rt");
+	// ÆÄÀÏ ¿­±â.
+	FILE* file = nullptr;
+	fopen_s(&file, path, "rt");
 
-    // ì˜ˆì™¸ ì²˜ë¦¬.
-    if (!file)
-    {
-        // í‘œì¤€ ì˜¤ë¥˜ ì½˜ì†” í™œìš©.
-        std::cerr << "Failed to open map file.\n";
+	// ¿¹¿Ü Ã³¸®.
+	if (!file)
+	{
+		// Ç¥ÁØ ¿À·ù ÄÜ¼Ö È°¿ë.
+		std::cerr << "Failed to open map file.\n";
 
-        // ë””ë²„ê·¸ ëª¨ë“œì—ì„œ ì¤‘ë‹¨ì ìœ¼ë¡œ ì¤‘ë‹¨í•´ì£¼ëŠ” ê¸°ëŠ¥.
-        __debugbreak();
-    }
+		// µğ¹ö±× ¸ğµå¿¡¼­ Áß´ÜÁ¡À¸·Î Áß´ÜÇØÁÖ´Â ±â´É.
+		__debugbreak();
+	}
 
-    // ë§µ ì½ê¸°.
-    // ë§µ í¬ê¸° íŒŒì•…: File Position í¬ì¸í„°ë¥¼ íŒŒì¼ì˜ ëìœ¼ë¡œ ì´ë™.
-    fseek(file, 0, SEEK_END);
+	// ¸Ê ÀĞ±â.
+	// ¸Ê Å©±â ÆÄ¾Ç: File Position Æ÷ÀÎÅÍ¸¦ ÆÄÀÏÀÇ ³¡À¸·Î ÀÌµ¿.
+	fseek(file, 0, SEEK_END);
 
-    // ì´ ìœ„ì¹˜ ì½ê¸°.
-    size_t fileSize = ftell(file);
+	// ÀÌ À§Ä¡ ÀĞ±â.
+	size_t fileSize = ftell(file);
 
-    // File Position ì²˜ìŒìœ¼ë¡œ ë˜ëŒë¦¬ê¸°.
-    rewind(file);
+	// File Position Ã³À½À¸·Î µÇµ¹¸®±â.
+	rewind(file);
 
-    // íŒŒì¼ì—ì„œ ë°ì´í„°ë¥¼ ì½ì–´ì˜¬ ë²„í¼ ìƒì„±.
-    char* data = new char[fileSize + 1];
+	// ÆÄÀÏ¿¡¼­ µ¥ÀÌÅÍ¸¦ ÀĞ¾î¿Ã ¹öÆÛ »ı¼º.
+	char* data = new char[fileSize + 1];
 
-    // ë°ì´í„° ì½ê¸°.
-    size_t readSize = fread(data, sizeof(char), fileSize, file);
+	// µ¥ÀÌÅÍ ÀĞ±â.
+	size_t readSize = fread(data, sizeof(char), fileSize, file);
 
-    // ì½ì–´ì˜¨ ë¬¸ìì—´ì„ ë¶„ì„(íŒŒì‹±-Parsing)í•´ì„œ ì¶œë ¥.
-    // ì¸ë±ìŠ¤ë¥¼ ì‚¬ìš©í•´ í•œë¬¸ìì”© ì½ê¸°.
-    int index = 0;
+	// ÀĞ¾î¿Â ¹®ÀÚ¿­À» ºĞ¼®(ÆÄ½Ì-Parsing)ÇØ¼­ Ãâ·Â.
+	// ÀÎµ¦½º¸¦ »ç¿ëÇØ ÇÑ¹®ÀÚ¾¿ ÀĞ±â.
+	int index = 0;
 
-    // ê°ì²´ë¥¼ ìƒì„±í•  ìœ„ì¹˜ ê°’.
-    Wanted::Vector2 position;
+	// °´Ã¼¸¦ »ı¼ºÇÒ À§Ä¡ °ª.
+	Wanted::Vector2 position;
 
-    while (true)
-    {
-        // ì¢…ë£Œ ì¡°ê±´.
-        if (index >= fileSize)
-        {
-            break;
-        }
+	while (true)
+	{
+		// Á¾·á Á¶°Ç.
+		if (index >= fileSize)
+		{
+			break;
+		}
 
-        // ìºë¦­í„° ì½ê¸°.
-        char mapCharacter = data[index];
-        ++index;
+		// Ä³¸¯ÅÍ ÀĞ±â.
+		char mapCharacter = data[index];
+		++index;
 
-        // ê°œí–‰ ë¬¸ì ì²˜ë¦¬.
-        if (mapCharacter == '\n')
-        {
-            //std::cout << "\n";
-            // yì¢Œí‘œëŠ” í•˜ë‚˜ ëŠ˜ë¦¬ê³ , x ì¢Œí‘œ ì´ˆê¸°í™”.
-            ++position.y;
-            position.x = 0;
-            continue;
-        }
+		// °³Çà ¹®ÀÚ Ã³¸®.
+		if (mapCharacter == '\n')
+		{
+			//std::cout << "\n";
+			// yÁÂÇ¥´Â ÇÏ³ª ´Ã¸®°í, x ÁÂÇ¥ ÃÊ±âÈ­.
+			++position.y;
+			position.x = 0;
+			continue;
+		}
 
-        /*
-        #: ë²½(Wall)
-        .: ë°”ë‹¥(Ground)
-        p: í”Œë ˆì´ì–´(Player)
-        b: ë°•ìŠ¤(Box)
-        t: íƒ€ê²Ÿ(Target)
-        */
-        // í•œë¬¸ìì”© ì²˜ë¦¬.
-        switch (mapCharacter)
-        {
-        case '#':
-        case '1':
-            //std::cout << "#";
-            AddNewActor(new Wall(position));
-            break;
+		/*
+		#: º®(Wall)
+		.: ¹Ù´Ú(Ground)
+		p: ÇÃ·¹ÀÌ¾î(Player)
+		b: ¹Ú½º(Box)
+		t: Å¸°Ù(Target)
+		*/
+		// ÇÑ¹®ÀÚ¾¿ Ã³¸®.
+		switch (mapCharacter)
+		{
+		case '#':
+		case '1':
+			//std::cout << "#";
+			AddNewActor(new Wall(position));
+			break;
 
-        case '.':
-            //std::cout << " ";
-            AddNewActor(new Ground(position));
-            break;
+		case '.':
+			//std::cout << " ";
+			AddNewActor(new Ground(position));
+			break;
 
-        case 'p':
-            //std::cout << "P";
-            // í”Œë ˆì´ì–´ë„ ì´ë™ ê°€ëŠ¥í•¨.
-            // í”Œë ˆì´ì–´ ë°‘ì— ë•…ì´ ìˆì–´ì•¼ í•¨.
-            AddNewActor(new Player(position));
-            AddNewActor(new Ground(position));
-            break;
+		case 'p':
+			//std::cout << "P";
+			// ÇÃ·¹ÀÌ¾îµµ ÀÌµ¿ °¡´ÉÇÔ.
+			// ÇÃ·¹ÀÌ¾î ¹Ø¿¡ ¶¥ÀÌ ÀÖ¾î¾ß ÇÔ.
+			AddNewActor(new Player(position));
+			AddNewActor(new Ground(position));
+			break;
 
-        case 'b':
-            //std::cout << "B";
-            // ë°•ìŠ¤ëŠ” ì´ë™ ê°€ëŠ¥í•¨.
-            // ë°•ìŠ¤ê°€ ì˜®ê²¨ì¡Œì„ ë•Œ ê·¸ ë°‘ì— ë•…ì´ ìˆì–´ì•¼ í•¨.
-            AddNewActor(new Box(position));
-            AddNewActor(new Ground(position));
-            break;
+		case 'b':
+			//std::cout << "B";
+			// ¹Ú½º´Â ÀÌµ¿ °¡´ÉÇÔ.
+			// ¹Ú½º°¡ ¿Å°ÜÁ³À» ¶§ ±× ¹Ø¿¡ ¶¥ÀÌ ÀÖ¾î¾ß ÇÔ.
+			AddNewActor(new Box(position));
+			AddNewActor(new Ground(position));
+			break;
 
-        case 't':
-            //std::cout << "T";
-            AddNewActor(new Target(position));
-	    ++targetScore;
-            break;
-        }
+		case 't':
+			//std::cout << "T";
+			AddNewActor(new Target(position));
+			++targetScore;
+			break;
+		}
 
-        // x ì¢Œí‘œ ì¦ê°€ ì²˜ë¦¬.
-        ++position.x;
-    }
+		// x ÁÂÇ¥ Áõ°¡ Ã³¸®.
+		++position.x;
+	}
 
-    // ì‚¬ìš©í•œ ë²„í¼ í•´ì œ.
-    delete[] data;
+	// »ç¿ëÇÑ ¹öÆÛ ÇØÁ¦.
+	delete[] data;
 
-    // íŒŒì¼ì´ ì •ìƒì ìœ¼ë¡œ ì—´ë ¸ìœ¼ë©´ ë‹«ê¸°.
-    fclose(file);
+	// ÆÄÀÏÀÌ Á¤»óÀûÀ¸·Î ¿­·ÈÀ¸¸é ´İ±â.
+	fclose(file);
 }
 
 bool SokobanLevel::CanMove(
-    const Wanted::Vector2& playerPosition,
-    const Wanted::Vector2& nextPosition)
+	const Wanted::Vector2& playerPosition, 
+	const Wanted::Vector2& nextPosition)
 {
-    // ë ˆë²¨ì— ìˆëŠ” ë°•ìŠ¤ ì•¡í„° ëª¨ìœ¼ê¸°.
-    // ë°•ìŠ¤ëŠ” í”Œë ˆì´ì–´ê°€ ë°€ê¸° ë“± ì¶”ê°€ì ìœ¼ë¡œ ì²˜ë¦¬í•´ì•¼í•˜ê¸° ë•Œë¬¸.
-    std::vector<Actor*> boxes;
+	// ·¹º§¿¡ ÀÖ´Â ¹Ú½º ¾×ÅÍ ¸ğÀ¸±â.
+	// ¹Ú½º´Â ÇÃ·¹ÀÌ¾î°¡ ¹Ğ±â µî Ãß°¡ÀûÀ¸·Î Ã³¸®ÇØ¾ßÇÏ±â ¶§¹®.
+	std::vector<Actor*> boxes;
 
-    // ë ˆë²¨ì— ë°°ì¹˜ëœ ì „ì²´ ì•¡í„°ë¥¼ ìˆœíšŒí•˜ë©´ì„œ ë°•ìŠ¤ ì°¾ê¸°.
-    for (Actor* const actor : actors)
-    {
-	// ì•¡í„°ê°€ ë°•ìŠ¤ íƒ€ì…ì¸ì§€ í™•ì¸.
-	if (actor->IsTypeOf<Box>())
-	{
-	    boxes.emplace_back(actor);
-	    continue;
-	}
-    }
-
-    // ì´ë™í•˜ë ¤ëŠ” ìœ„ì¹˜ì— ë°•ìŠ¤ê°€ ìˆëŠ”ì§€ í™•ì¸.
-    Actor* boxActor = nullptr;
-    for (Actor* const box : boxes)
-    {
-	// ìœ„ì¹˜ ë¹„êµ.
-	if (box->GetPosition() == nextPosition)
-	{
-	    boxActor = box;
-	    break;
-	}
-    }
-
-    // ê²½ìš°ì˜ ìˆ˜ ì²˜ë¦¬.
-    // ì´ë™í•˜ë ¤ëŠ” ê³³ì— ë°•ìŠ¤ê°€ ìˆëŠ” ê²½ìš°.
-    if (boxActor)
-    {
-	// #1: ë°•ìŠ¤ë¥¼ ì´ë™ì‹œí‚¤ë ¤ëŠ” ìœ„ì¹˜ì— ë‹¤ë¥¸ ë°•ìŠ¤ê°€ ë˜ ìˆëŠ”ì§€ í™•ì¸.
-	// ë‘ ìœ„ì¹˜ ì‚¬ì´ì—ì„œ ì´ë™ ë°©í–¥ êµ¬í•˜ê¸° (ë²¡í„°ì˜ ëº„ì…ˆ í™œìš©).
-	// ì´ë™ ë¡œì§ì—ì„œ ë‘ ë²¡í„°ë¥¼ ë”í•œë‹¤ëŠ” ê²ƒì€
-	// ë‘˜ ì¤‘ í•˜ë‚˜ëŠ” ìœ„ì¹˜(Location)ì´ê³  ë‹¤ë¥¸ í•˜ë‚˜ëŠ” ë²¡í„°(Vector).
-	Vector2 direction = nextPosition - playerPosition;
-	Vector2 newPosition = boxActor->GetPosition() + direction;
-
-	// ë°•ìŠ¤ ê²€ìƒ‰.
-	for (Actor* const otherBox : boxes)
-	{
-	    // ì•ì—ì„œ ê²€ìƒ‰í•œ ë°•ìŠ¤ì™€ ê°™ë‹¤ë©´ ê±´ë„ˆë›°ê¸°.
-	    if (otherBox == boxActor)
-	    {
-		continue;
-	    }
-
-	    // ë‹¤ë¥¸ ë°•ìŠ¤ê°€ ìˆëŠ”ì§€ í™•ì¸.
-	    if (otherBox->GetPosition() == newPosition)
-	    {
-		// ë‘ ê°œì˜ ë°•ìŠ¤ê°€ ê²¹ì³ì§„ ë°©í–¥ìœ¼ë¡œëŠ” ì´ë™ ëª»í•¨.
-		return false;
-	    }
-	}
-
-	// ê²€ìƒ‰.
+	// ·¹º§¿¡ ¹èÄ¡µÈ ÀüÃ¼ ¾×ÅÍ¸¦ ¼øÈ¸ÇÏ¸é¼­ ¹Ú½º Ã£±â.
 	for (Actor* const actor : actors)
 	{
-	    if (actor->GetPosition() == newPosition)
-	    {
-		// #2: ë²½ì´ë©´ ì´ë™ ë¶ˆê°€.
-		if (actor->IsTypeOf<Wall>())
+		// ¾×ÅÍ°¡ ¹Ú½º Å¸ÀÔÀÎÁö È®ÀÎ.
+		if (actor->IsTypeOf<Box>())
 		{
-		    return false;
+			boxes.emplace_back(actor);
+			continue;
 		}
-
-		// #3: ê·¸ë¼ìš´ë“œ ë˜ëŠ” íƒ€ê²Ÿì´ë©´ ì´ë™ ê°€ëŠ¥.
-		if (actor->IsTypeOf<Ground>()
-		    || actor->IsTypeOf<Target>())
-		{
-		    // ë°•ìŠ¤ ì´ë™ ì²˜ë¦¬.
-		    boxActor->SetPosition(newPosition);
-
-		    // ê²Œì„ ì ìˆ˜ í™•ì¸.
-		    isGameClear = CheckGameClear();
-
-		    // í”Œë ˆì´ì–´ ì´ë™ ê°€ëŠ¥.
-		    return true;
-		}
-	    }
 	}
-    }
 
-    // ì´ë™í•˜ë ¤ëŠ” ê³³ì— ë°•ìŠ¤ê°€ ì—†ëŠ” ê²½ìš°.
-    // -> ì´ë™í•˜ë ¤ëŠ” ê³³ì— ìˆëŠ” ì•¡í„°ê°€ ë²½ì´ ì•„ë‹ˆë©´ ì´ë™ ê°€ëŠ¥.
-    for (Actor* const actor : actors)
-    {
-	// ë¨¼ì €, ì´ë™í•˜ë ¤ëŠ” ìœ„ì¹˜ì— ìˆëŠ” ì•¡í„° ê²€ìƒ‰.
-	if (actor->GetPosition() == nextPosition)
+	// ÀÌµ¿ÇÏ·Á´Â À§Ä¡¿¡ ¹Ú½º°¡ ÀÖ´ÂÁö È®ÀÎ.
+	Actor* boxActor = nullptr;
+	for (Actor* const box : boxes)
 	{
-	    // ì´ ì•¡í„°ê°€ ë²½ì¸ì§€ í™•ì¸.
-	    if (actor->IsTypeOf<Wall>())
-	    {
-		return false;
-	    }
-
-	    // ê·¸ë¼ìš´ë“œ ë˜ëŠ” íƒ€ê²Ÿ.
-	    return true;
+		// À§Ä¡ ºñ±³.
+		if (box->GetPosition() == nextPosition)
+		{
+			boxActor = box;
+			break;
+		}
 	}
-    }
 
-    // ì—ëŸ¬.
-    return false;
+	// °æ¿ìÀÇ ¼ö Ã³¸®.
+	// ÀÌµ¿ÇÏ·Á´Â °÷¿¡ ¹Ú½º°¡ ÀÖ´Â °æ¿ì.
+	if (boxActor)
+	{
+		// #1: ¹Ú½º¸¦ ÀÌµ¿½ÃÅ°·Á´Â À§Ä¡¿¡ ´Ù¸¥ ¹Ú½º°¡ ¶Ç ÀÖ´ÂÁö È®ÀÎ.
+		// µÎ À§Ä¡ »çÀÌ¿¡¼­ ÀÌµ¿ ¹æÇâ ±¸ÇÏ±â (º¤ÅÍÀÇ »¬¼À È°¿ë).
+		// ÀÌµ¿ ·ÎÁ÷¿¡¼­ µÎ º¤ÅÍ¸¦ ´õÇÑ´Ù´Â °ÍÀº
+		// µÑ Áß ÇÏ³ª´Â À§Ä¡(Location)ÀÌ°í ´Ù¸¥ ÇÏ³ª´Â º¤ÅÍ(Vector).
+		Vector2 direction = nextPosition - playerPosition;
+		Vector2 newPosition = boxActor->GetPosition() + direction;
+
+		// ¹Ú½º °Ë»ö.
+		for (Actor* const otherBox : boxes)
+		{
+			// ¾Õ¿¡¼­ °Ë»öÇÑ ¹Ú½º¿Í °°´Ù¸é °Ç³Ê¶Ù±â.
+			if (otherBox == boxActor)
+			{
+				continue;
+			}
+
+			// ´Ù¸¥ ¹Ú½º°¡ ÀÖ´ÂÁö È®ÀÎ.
+			if (otherBox->GetPosition() == newPosition)
+			{
+				// µÎ °³ÀÇ ¹Ú½º°¡ °ãÃÄÁø ¹æÇâÀ¸·Î´Â ÀÌµ¿ ¸øÇÔ.
+				return false;
+			}
+		}
+
+		// °Ë»ö.
+		for (Actor* const actor : actors)
+		{
+			if (actor->GetPosition() == newPosition)
+			{
+				// #2: º®ÀÌ¸é ÀÌµ¿ ºÒ°¡.
+				if (actor->IsTypeOf<Wall>())
+				{
+					return false;
+				}
+
+				// #3: ±×¶ó¿îµå ¶Ç´Â Å¸°ÙÀÌ¸é ÀÌµ¿ °¡´É.
+				if (actor->IsTypeOf<Ground>()
+					|| actor->IsTypeOf<Target>())
+				{
+					// ¹Ú½º ÀÌµ¿ Ã³¸®.
+					boxActor->SetPosition(newPosition);
+
+					// °ÔÀÓ Á¡¼ö È®ÀÎ.
+					isGameClear = CheckGameClear();
+
+					// ÇÃ·¹ÀÌ¾î ÀÌµ¿ °¡´É.
+					return true;
+				}
+			}
+		}
+	}
+
+	// ÀÌµ¿ÇÏ·Á´Â °÷¿¡ ¹Ú½º°¡ ¾ø´Â °æ¿ì.
+	// -> ÀÌµ¿ÇÏ·Á´Â °÷¿¡ ÀÖ´Â ¾×ÅÍ°¡ º®ÀÌ ¾Æ´Ï¸é ÀÌµ¿ °¡´É.
+	for (Actor* const actor : actors)
+	{
+		// ¸ÕÀú, ÀÌµ¿ÇÏ·Á´Â À§Ä¡¿¡ ÀÖ´Â ¾×ÅÍ °Ë»ö.
+		if (actor->GetPosition() == nextPosition)
+		{
+			// ÀÌ ¾×ÅÍ°¡ º®ÀÎÁö È®ÀÎ.
+			if (actor->IsTypeOf<Wall>())
+			{
+				return false;
+			}
+
+			// ±×¶ó¿îµå ¶Ç´Â Å¸°Ù.
+			return true;
+		}
+	}
+
+	// ¿¡·¯.
+	return false;
 }
 
 bool SokobanLevel::CheckGameClear()
 {
-    // íƒ€ê²Ÿ ìœ„ì— ìˆëŠ” ë°•ìŠ¤ì˜ ìˆ˜ ê²€ì¦.
-    int currentScore = 0;
+	// Å¸°Ù À§¿¡ ÀÖ´Â ¹Ú½ºÀÇ ¼ö °ËÁõ.
+	int currentScore = 0;
 
-    // ë°°ì—´ì— ë°•ìŠ¤ ë° íƒ€ê²Ÿ ì €ì¥.
-    std::vector<Actor*> boxes;
-    std::vector<Actor*> targets;
+	// ¹è¿­¿¡ ¹Ú½º ¹× Å¸°Ù ÀúÀå.
+	std::vector<Actor*> boxes;
+	std::vector<Actor*> targets;
 
-    // ë ˆë²¨ì— ë°°ì¹˜ëœ ë°°ì—´ ìˆœíšŒí•˜ë©´ì„œ ë‘ ì•¡í„° í•„í„°ë§.
-    for (Actor* const actor : actors)
-    {
-	// ì•¡í„°ê°€ ë°•ìŠ¤ íƒ€ì…ì¸ì§€ í™•ì¸.
-	if (actor->IsTypeOf<Box>())
+	// ·¹º§¿¡ ¹èÄ¡µÈ ¹è¿­ ¼øÈ¸ÇÏ¸é¼­ µÎ ¾×ÅÍ ÇÊÅÍ¸µ.
+	for (Actor* const actor : actors)
 	{
-	    boxes.emplace_back(actor);
-	    continue;
+		// ¹Ú½ºÀÎ °æ¿ì ¹Ú½º ¹è¿­¿¡ Ãß°¡.
+		if (actor->IsTypeOf<Box>())
+		{
+			boxes.emplace_back(actor);
+			continue;
+		}
+
+		// Å¸°ÙÀÇ °æ¿ì Å¸°Ù ¹è¿­¿¡ Ãß°¡.
+		if (actor->IsTypeOf<Target>())
+		{
+			targets.emplace_back(actor);
+		}
 	}
 
-	// íƒ€ê²Ÿì˜ ê²½ìš° íƒ€ê²Ÿ ë°°ì—´ì— ì¶”ê°€
-	if (actor->IsTypeOf<Target>())
+	// Á¡¼ö È®ÀÎ (¹Ú½ºÀÇ À§Ä¡°¡ Å¸°ÙÀÇ À§Ä¡¿Í °°ÀºÁö ºñ±³).
+	for (Actor* const box : boxes)
 	{
-	    targets.emplace_back(actor);
+		for (Actor* const target : targets)
+		{
+			// µÎ ¾×ÅÍÀÇ À§Ä¡°¡ °°À¸¸é Á¡¼ö +.
+			if (box->GetPosition() == target->GetPosition())
+			{
+				currentScore += 1;
+			}
+		}
 	}
-    }
 
-    //ì ìˆ˜ í™•ì¸ (ë°•ìŠ¤ì˜ ìœ„ì¹˜ê°€ íƒ€ê²Ÿì˜ ìœ„ì¹˜ì™€ ê°™ì€ì§€ ë¹„êµ).
-    for (auto const box : boxes) 
-    {
-	for (auto const target : targets) 
-	{
-	    if (box->GetPosition() == target->GetPosition()) 
-	    {
-		++currentScore;
-	    }
-	}
-    }
-    return currentScore == targetScore;
+	// ¸ñÇ¥ Á¡¼ö¿¡ µµ´ŞÇß´ÂÁö È®ÀÎ.
+	return currentScore == targetScore;
 }

@@ -1,81 +1,80 @@
-ï»¿#pragma once
+#pragma once
 
 #include "Common/Common.h"
 
 namespace Wanted
 {
-	// ì „ë°© ì„ ì–¸.
-    class Input;
-    class Renderer;
+	// Àü¹æ ¼±¾ğ.
+	class Input;
+	class Renderer;
 
 	// Main game engine class.
 	class WANTED_API Engine
 	{
-		// ì—”ì§„ ì„¤ì • êµ¬ì¡°ì²´.
+		// ¿£Áø ¼³Á¤ ±¸Á¶Ã¼.
 		struct EngineSetting
 		{
-			// í”„ë ˆì„ ì†ë„.
+			// ÇÁ·¹ÀÓ ¼Óµµ.
 			float framerate = 0.0f;
 
-			// í™”ë©´ ë„ˆë¹„.
+			// È­¸é ³Êºñ.
 			int width = 0;
-			
-			// í™”ë©´ ë†’ì´.
-			int height = 0;
 
+			// È­¸é ³ôÀÌ.
+			int height = 0;
 		};
 
 	public:
 		Engine();
-		~Engine();
+		virtual ~Engine();
 
-		// ì—”ì§„ ë£¨í”„(ê²Œì„ ë£¨í”„).
+		// ¿£Áø ·çÇÁ(°ÔÀÓ ·çÇÁ).
 		void Run();
 
-		// ì—”ì§„ ì¢…ë£Œ í•¨ìˆ˜.
+		// ¿£Áø Á¾·á ÇÔ¼ö.
 		void QuitEngine();
 
-		// ìƒˆ ë ˆë²¨ì„ ì¶”ê°€(ì„¤ì •)í•˜ëŠ” í•¨ìˆ˜.
+		// »õ ·¹º§À» Ãß°¡(¼³Á¤)ÇÏ´Â ÇÔ¼ö.
 		void SetNewLevel(class Level* newLevel);
 
-		// ì „ì—­ ì ‘ê·¼ í•¨ìˆ˜.
+		// Àü¿ª Á¢±Ù ÇÔ¼ö.
 		static Engine& Get();
 
 	protected:
 
-		// ì •ë¦¬ í•¨ìˆ˜.
+		// Á¤¸® ÇÔ¼ö.
 		void Shutdown();
 
-		// ì„¤ì • íŒŒì¼ ë¡œë“œ í•¨ìˆ˜.
+		// ¼³Á¤ ÆÄÀÏ ·Îµå ÇÔ¼ö.
 		void LoadSetting();
 
-		// ê²Œì„ í”Œë ˆì´ ì‹œì‘ í•¨ìˆ˜.
-		// Unityì˜ ê²½ìš°: Start/Awake.
+		// °ÔÀÓ ÇÃ·¹ÀÌ ½ÃÀÛ ÇÔ¼ö.
+		// UnityÀÇ °æ¿ì: Start/Awake.
 		void BeginPlay();
 
-		// ì—…ë°ì´íŠ¸ í•¨ìˆ˜.
+		// ¾÷µ¥ÀÌÆ® ÇÔ¼ö.
 		void Tick(float deltaTime);
 
-		// ê·¸ë¦¬ê¸° í•¨ìˆ˜. (Draw/Render).
+		// ±×¸®±â ÇÔ¼ö. (Draw/Render).
 		void Draw();
 
 	protected:
-		// ì—”ì§„ ì¢…ë£Œ í”Œë˜ê·¸.
+		// ¿£Áø Á¾·á ÇÃ·¡±×.
 		bool isQuit = false;
 
-		// ì—”ì§„ ì„¤ì • ê°’.
+		// ¿£Áø ¼³Á¤ °ª.
 		EngineSetting setting;
 
-		// ì…ë ¥ ê´€ë¦¬ì.
+		// ÀÔ·Â °ü¸®ÀÚ.
 		Input* input = nullptr;
 
-		// ë Œë”ëŸ¬ ê°ì²´.
+		// ·»´õ·¯ °´Ã¼.
 		Renderer* renderer = nullptr;
 
-		// ë©”ì¸ ë ˆë²¨.
+		// ¸ŞÀÎ ·¹º§.
 		class Level* mainLevel = nullptr;
 
-		// ì „ì—­ ë³€ìˆ˜.
+		// Àü¿ª º¯¼ö.
 		static Engine* instance;
 	};
 }

@@ -1,8 +1,8 @@
-ï»¿#include "Box.h"
+#include "Box.h"
 
 Box::Box(const Vector2& newPosition)
-	: super("B", newPosition, Color::Blue)
+	: super('B', newPosition, Color::Blue)
 {
-	// ê·¸ë¦¬ê¸° ìš°ì„ ìˆœìœ„ ì„¤ì •.
+	// ±×¸®±â ¿ì¼±¼øÀ§ ¼³Á¤.
 	sortingOrder = 5;
 }

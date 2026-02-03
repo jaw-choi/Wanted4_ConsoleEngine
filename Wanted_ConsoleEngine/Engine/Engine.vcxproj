@@ -69,11 +69,7 @@
     <PostBuildEvent>
       <Command>xcopy $(OutDir)\Engine.dll ..\Library\Engine\$(Platform)\$(Configuration)\ /e /y
 
-xcopy $(OutDir)\Engine.lib ..\Library\Engine\$(Platform)\$(Configuration)\ /e /y
-
-xcopy $(SolutionDir)Assets\*.txt ..\Bin\$(Platform)\$(Configuration)\Assets\ /e /y
-
-xcopy $(SolutionDir)Config\*.txt ..\Bin\$(Platform)\$(Configuration)\Config\ /e /y</Command>
+xcopy $(OutDir)\Engine.lib ..\Library\Engine\$(Platform)\$(Configuration)\ /e /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -96,11 +92,7 @@ xcopy $(SolutionDir)Config\*.txt ..\Bin\$(Platform)\$(Configuration)\Config\ /e 
     <PostBuildEvent>
       <Command>xcopy $(OutDir)\Engine.dll ..\Library\Engine\$(Platform)\$(Configuration)\ /e /y
 
-xcopy $(OutDir)\Engine.lib ..\Library\Engine\$(Platform)\$(Configuration)\ /e /y
-
-xcopy $(SolutionDir)Assets\*.txt ..\Bin\$(Platform)\$(Configuration)\Assets\ /e /y
-
-xcopy $(SolutionDir)Config\*.txt ..\Bin\$(Platform)\$(Configuration)\Config\ /e /y</Command>
+xcopy $(OutDir)\Engine.lib ..\Library\Engine\$(Platform)\$(Configuration)\ /e /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

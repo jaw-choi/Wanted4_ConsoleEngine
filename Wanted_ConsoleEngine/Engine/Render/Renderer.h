@@ -1,4 +1,4 @@
-ï»¿#pragma once
+#pragma once
 
 #include "Math/Vector2.h"
 #include "Math/Color.h"
@@ -7,83 +7,90 @@
 
 namespace Wanted
 {
-    // ì½˜ì†” ë²„í¼ë¥¼ ê´€ë¦¬í•˜ëŠ” í´ë˜ìŠ¤.
-    class ScreenBuffer;
+	// ÄÜ¼Ö ¹öÆÛ¸¦ °ü¸®ÇÏ´Â Å¬·¡½º.
+	class ScreenBuffer;
 
-    // ë”ë¸” ë²„í¼ë§ì„ ì§€ì›í•˜ëŠ” ë Œë”ëŸ¬ í´ë˜ìŠ¤.
-    class WANTED_API Renderer
-    {
-        // í”„ë ˆì„ êµ¬ì¡°ì²´ - 2ì°¨ì› ê¸€ì ë°°ì—´ì˜ í•­ëª©ì´ ë  êµ¬ì¡°ì²´.
-        struct Frame
-        {
-            Frame(int bufferCount);
-            ~Frame();
+	// ´õºí ¹öÆÛ¸µÀ» Áö¿øÇÏ´Â ·»´õ·¯ Å¬·¡½º.
+	class WANTED_API Renderer
+	{
+		// ÇÁ·¹ÀÓ ±¸Á¶Ã¼ - 2Â÷¿ø ±ÛÀÚ ¹è¿­ÀÇ Ç×¸ñÀÌ µÉ ±¸Á¶Ã¼.
+		struct Frame
+		{
+			Frame(int bufferCount);
+			~Frame();
 
-            // ì§€ìš°ê¸° í•¨ìˆ˜
-            void Clear(const Vector2& screenSize);
+			// Áö¿ì±â ÇÔ¼ö.
+			void Clear(const Vector2& screenSize);
 
-            // ê¸€ì ê°’ê³¼ ê¸€ìì˜ ìƒ‰ìƒì„ ê°–ëŠ” íƒ€ì….
-            CHAR_INFO* charInfoArray = nullptr;
+			// ±ÛÀÚ °ª°ú ±ÛÀÚÀÇ »ö»óÀ» °®´Â Å¸ÀÔ.
+			CHAR_INFO* charInfoArray = nullptr;
 
-            // ê·¸ë¦¬ê¸° ìš°ì„ ìˆœìœ„ ë°°ì—´.
-            int* sortingOrderArray = nullptr;
-        };
+			// ±×¸®±â ¿ì¼±¼øÀ§ ¹è¿­.
+			int* sortingOrderArray = nullptr;
+		};
 
-        // ë Œë”ë§í•  ë°ì´í„°.
-        struct RenderCommand
-        {
-            // í™”ë©´ì— ë³´ì—¬ì¤„ ë¬¸ìì—´ ê°’.
-            const char* text = nullptr;
+		// ·»´õ¸µÇÒ µ¥ÀÌÅÍ.
+		struct RenderCommand
+		{
+			// È­¸é¿¡ º¸¿©ÁÙ ¹®ÀÚ¿­ °ª.
+			const char* text = nullptr;
 
-            // ì¢Œí‘œ.
-            Vector2 position;
+			// ÁÂÇ¥.
+			Vector2 position;
 
-            // ìƒ‰ìƒ.
-            Color color = Color::White;
+			// »ö»ó.
+			Color color = Color::White;
 
-            // ê·¸ë¦¬ê¸° ìš°ì„ ìˆœìœ„.
-            int sortingOrder = 0;
-        };
+			// ±×¸®±â ¿ì¼±¼øÀ§.
+			int sortingOrder = 0;
+		};
 
-        // ì‹±ê¸€í†¤ ì ‘ê·¼ í•¨ìˆ˜.
-        static Renderer& Get();
+	public:
+		Renderer(const Vector2& screenSize);
+		~Renderer();
 
-    public:
-        Renderer(const Vector2& screenSize);
-        ~Renderer();
+		// ±×¸®±â ÇÔ¼ö.
+		void Draw();
 
-        void Draw();
+		// ±×¸®´Âµ¥ ÇÊ¿äÇÑ µ¥ÀÌÅÍ¸¦ Á¦Ãâ(ÀûÀç)ÇÏ´Â ÇÔ¼ö.
+		void Submit(
+			const char* text,
+			const Vector2& position,
+			Color color = Color::White,
+			int sortingOrder = 0
+		);
 
-        // ê·¸ë¦¬ëŠ”ë° í•„ìš”í•œ ë°ì´í„°ë¥¼ ì œì¶œ(ì ì¬)í•˜ëŠ” í•¨ìˆ˜.
-        void Submit(const char* text, const Vector2& position, Color color = Color::White, int sortingOrder = 0);
+		// ½Ì±ÛÅæ Á¢±Ù ÇÔ¼ö.
+		static Renderer& Get();
 
-    private:
-        // í™”ë©´ ì§€ìš°ëŠ” í•¨ìˆ˜.
-        void Clear();
+	private:
 
-        // ë”ë¸” ë²„í¼ë§ì„ í™œìš©í•´ í™œì„±í™” ë²„í¼ë¥¼ êµí™˜í•˜ëŠ” í•¨ìˆ˜.
-        void Present();
+		// È­¸é Áö¿ì´Â ÇÔ¼ö.
+		void Clear();
 
-        // í˜„ì¬ ì‚¬ìš©í•  ë²„í¼ë¥¼ ë°˜í™˜í•˜ëŠ” í•¨ìˆ˜(Getter).
-        ScreenBuffer* GetCurrentBuffer();
+		// ´õºí ¹öÆÛ¸µÀ» È°¿ëÇØ È°¼ºÈ­ ¹öÆÛ¸¦ ±³È¯ÇÏ´Â ÇÔ¼ö.
+		void Present();
 
-    private:
-        // í™”ë©´ í¬ê¸°.
-        Vector2 screenSize;
+		// ÇöÀç »ç¿ëÇÒ ¹öÆÛ¸¦ ¹İÈ¯ÇÏ´Â ÇÔ¼ö(Getter).
+		ScreenBuffer* GetCurrentBuffer();
 
-        // ê´€ë¦¬í•  í”„ë ˆì„ ê°ì²´.
-        Frame* frame = nullptr;
+	private:
+		// È­¸é Å©±â.
+		Vector2 screenSize;
 
-        // ì´ì¤‘ ë²„í¼ ë°°ì—´.
-        ScreenBuffer* screenBuffers[2] = {};
+		// °ü¸®ÇÒ ÇÁ·¹ÀÓ °´Ã¼.
+		Frame* frame = nullptr;
 
-        // í˜„ì¬ í™œì„±í™”ëœ ë²„í¼ ì¸ë±ìŠ¤.
-        int currentBufferIndex = 0;
+		// ÀÌÁß ¹öÆÛ ¹è¿­.
+		ScreenBuffer* screenBuffers[2] = {};
 
-        // ë Œë” í (ì”¬ì˜ ëª¨ë“  ê·¸ë¦¬ê¸° ëª…ë ¹ì„ ëª¨ì•„ë‘ëŠ” ë°°ì—´).
-        std::vector<RenderCommand> renderQueue;
+		// ÇöÀç È°¼ºÈ­µÈ ¹öÆÛ ÀÎµ¦½º.
+		int currentBufferIndex = 0;
 
-        // ì‹±ê¸€í†¤ êµ¬í˜„ì„ ìœ„í•œ ì •ì  ë³€ìˆ˜.
-        static Renderer* instance;
-    };
+		// ·»´õ Å¥ (¾ÀÀÇ ¸ğµç ±×¸®±â ¸í·ÉÀ» ¸ğ¾ÆµÎ´Â ¹è¿­).
+		std::vector<RenderCommand> renderQueue;
+
+		// ½Ì±ÛÅæ ±¸ÇöÀ» À§ÇÑ Á¤Àû º¯¼ö.
+		static Renderer* instance;
+	};
 }

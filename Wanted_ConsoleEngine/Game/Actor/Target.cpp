@@ -1,8 +1,8 @@
-ï»¿#include "Target.h"
+#include "Target.h"
 
 Target::Target(const Vector2& position)
-	: super("T", position, Color::Green)
+	: super('T', position, Color::Green)
 {
-	// ê·¸ë¦¬ê¸° ìš°ì„ ìˆœìœ„ ì„¤ì •.
+	// ±×¸®±â ¿ì¼±¼øÀ§ ¼³Á¤.
 	sortingOrder = 3;
 }
