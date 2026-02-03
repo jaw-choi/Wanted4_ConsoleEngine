@@ -94,23 +94,104 @@ namespace Wanted
 
     void Renderer::Draw()
     {
+	// 화면 지우기.
+	Clear();
+
+	// 전제조건: 레벨의 모든 액터가 렌더러에 submit을 완료.
+	// 렌더큐 순회하면서 채우기.
+	for (const RenderCommand& command : renderQueue)
+	{
+	    // 화면에 그릴 텍스트가 없으면 건너 뜀.
+	    if (!command.text)
+		continue;
+
+	    // 세로 기준 화면 벗어났는지 확인.
+	    if (command.position.y < 0 || command.position.y >= screenSize.y)
+		continue;
+
+	    // 화면에 그릴 문자열 길이
+	    const int length = static_cast<int>(strlen(command.text));
+
+	    if (length <= 0)
+		continue;
+
+	    // x좌표 기준으로 화면에서 벗어났는지 확인.
+	    const int startX = command.position.x;
+	    const int endX = command.position.x + length - 1;
+
+	    if (endX < 0 || startX >= screenSize.x)
+		continue;
+	    
+	    // 시작 위치.
+	    const int visibleStart = startX < 0 ? 0 : startX;
+	    const int visibleEnd = endX >= screenSize.x ? screenSize.x - 1 : endX;
+
+	    // 문자열을 표시하는 범위를 설정하는 반복문.
+	    for (int x = visibleStart; x <= visibleEnd; ++x)
+	    {
+		// 원본 텍스트에서의 해당 문자 인덱스를 계산.
+		const int sourceIndex = x - startX;
+
+		// 프레임 (2차원 문자 배열) 인덱스.
+		const int index = (command.position.y * screenSize.x) + x;
+
+		// 그리기 우선순위 비교.
+		if (frame->sortingOrderArray[index] > command.sortingOrder)
+		    continue;
+
+		// 데이터 기록.
+		frame->charInfoArray[index].Char.AsciiChar = command.text[sourceIndex];
+		frame->charInfoArray[index].Attributes = (WORD)command.color;
+	    }
+	
+	}
+
+	// 그리기.
+	GetCurrentBuffer()->Draw(frame->charInfoArray);
+	
+
+	// 버퍼 교환.
+	Present();
+
+	// 렌더 큐 비우기.
+	renderQueue.clear();
+
     }
 
     void Renderer::Submit(const char* text, const Vector2& position, Color color, int sortingOrder)
     {
+	// 렌더 데이터 생성 후 큐에 추가.
+	RenderCommand command = {};
+	command.text = text;
+	command.position = position;
+	command.color= color;
+	command.sortingOrder = sortingOrder;
+
+	renderQueue.emplace_back(command);
     }
 
     void Renderer::Clear()
     {
+	// 화면 지우기.
+	// 1. 프레임(2차원 배열 데이터) 지우기.
+	frame->Clear(screenSize);
+
+	// 2. 콘솔 버퍼 지우기
+	GetCurrentBuffer()->Clear();
     }
 
     void Renderer::Present()
     {
+	// 버퍼 교환.
+	SetConsoleActiveScreenBuffer(GetCurrentBuffer()->GetBuffer());
+
+	// 인덱스 교체.
+	currentBufferIndex = 1 - currentBufferIndex;
     }
 
     ScreenBuffer* Renderer::GetCurrentBuffer()
     {
-	return nullptr;
+	return screenBuffers[currentBufferIndex];
     }
 
 }
