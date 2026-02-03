@@ -1,6 +1,6 @@
-#include "Actor.h"
+ï»¿#include "Actor.h"
 #include "Util/Util.h"
-#include "Core/Renderer.h"
+#include "Render/Renderer.h"
 
 #include <iostream>
 #include <Windows.h>
@@ -8,20 +8,26 @@
 namespace Wanted
 {
 	Actor::Actor(
-		const char image, 
+		const char* image, 
 		const Vector2& position,
 		Color color)
-		: image(image), position(position), color(color)
+		:position(position), color(color)
 	{
+	    // ë¬¸ìì—´ ë³µì‚¬. (RAII)
+	    size_t length = strlen(image) + 1;  // ë¬¸ìì—´ì˜ ê¸¸ì´ë¥¼ êµ¬í•˜ê³  ë„ ì¢…ë£Œ ë¬¸ì í¬ê¸°ë¥¼ ì¶”ê°€
+	    this->image = new char[length];      // ë¬¸ìì—´ì„ ì €ì¥í•  ë©”ëª¨ë¦¬ ë™ì  í• ë‹¹
+	    strcpy_s(this->image, length, image); // ì•ˆì „í•˜ê²Œ ë¬¸ìì—´ì„ ë³µì‚¬
+
 	}
 
 	Actor::~Actor()
 	{
+	    SafeDeleteArray(image);
 	}
 
 	void Actor::BeginPlay()
 	{
-		// ÀÌº¥Æ®¸¦ ¹ŞÀº ÈÄ¿¡´Â ÇÃ·¡±× ¼³Á¤.
+		// ì´ë²¤íŠ¸ë¥¼ ë°›ì€ í›„ì—ëŠ” í”Œë˜ê·¸ ì„¤ì •.
 		hasBeganPlay = true;
 	}
 
@@ -31,16 +37,21 @@ namespace Wanted
 
 	void Actor::Draw()
 	{
-		// ·»´õ·¯¿¡ ±×¸®±â ¿äÃ».
-		Renderer::Draw(position, color, image);
+		//Renderer::Draw(position, color, image);
+		// ë Œë”ëŸ¬ì— ë°ì´í„° ì œì¶œ.
+	    Renderer::Get().Submit(image, position, color, sortingOrder);
+		
 	}
 
 	void Actor::SetPosition(const Vector2& newPosition)
 	{
-		// ·»´õ·¯¿¡ ºóÄ­ ±×¸®±â ¿äÃ».
-		Renderer::Draw(position, ' ');
+		// ë Œë”ëŸ¬ì— ë¹ˆì¹¸ ê·¸ë¦¬ê¸° ìš”ì²­.
+		//Renderer::Draw(position, ' ');
 
-		// »õ·Î¿î À§Ä¡ ¼³Á¤.
+	    if (position == newPosition)
+		return;
+
+		// ìƒˆë¡œìš´ ìœ„ì¹˜ ì„¤ì •.
 		position = newPosition;
 	}
 }

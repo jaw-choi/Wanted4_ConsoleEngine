@@ -1,63 +1,67 @@
-#include "Engine.h"
+ï»¿#include "Engine.h"
 #include "Level/Level.h"
 #include "Core/Input.h"
 #include "Util/Util.h"
+#include "Render/Renderer.h"
 
 #include <iostream>
 #include <Windows.h>
 
 namespace Wanted
 {
-	// Àü¿ª º¯¼ö ÃÊ±âÈ­.
+	// ì „ì—­ ë³€ìˆ˜ ì´ˆê¸°í™”.
 	Engine* Engine::instance = nullptr;
 
 	Engine::Engine()
 	{
-		// Àü¿ª º¯¼ö °ª ÃÊ±âÈ­.
+		// ì „ì—­ ë³€ìˆ˜ ê°’ ì´ˆê¸°í™”.
 		instance = this;
 
-		// ÀÔ·Â °ü¸®ÀÚ »ı¼º.
+		// ì…ë ¥ ê´€ë¦¬ì ìƒì„±.
 		input = new Input();
 
-		// ¼³Á¤ ÆÄÀÏ ·Îµå.
+		// ì„¤ì • íŒŒì¼ ë¡œë“œ.
 		LoadSetting();
 
-		// Ä¿¼­ ²ô±â.
+		renderer = new Renderer(Vector2(setting.width, setting.height));
+
+		// ì»¤ì„œ ë„ê¸°.
 		Util::TurnOffCursor();
 	}
 
 	Engine::~Engine()
 	{
-		// ¸ŞÀÎ ·¹º§ Á¦°Å.
+		// ë©”ì¸ ë ˆë²¨ ì œê±°.
 		if (mainLevel)
 		{
 			delete mainLevel;
 			mainLevel = nullptr;
 		}
 
-		// ÀÔ·Â °ü¸®ÀÚ Á¦°Å.
+		// ì…ë ¥ ê´€ë¦¬ì ì œê±°.
 		if (input)
 		{
 			delete input;
 			input = nullptr;
 		}
+		SafeDelete(renderer);
 	}
 
 	void Engine::Run()
 	{
-		// ½Ã°èÀÇ Á¤¹Ğµµ.
+		// ì‹œê³„ì˜ ì •ë°€ë„.
 		LARGE_INTEGER frequency;
 		QueryPerformanceFrequency(&frequency);
 
-		// ÇÁ·¹ÀÓ °è»ê¿ë º¯¼ö.
+		// í”„ë ˆì„ ê³„ì‚°ìš© ë³€ìˆ˜.
 		int64_t currentTime = 0;
 		int64_t previousTime = 0;
 
-		// ÇÏµå¿ş¾î Å¸ÀÌ¸Ó·Î ½Ã°£ ±¸ÇÏ±â.
+		// í•˜ë“œì›¨ì–´ íƒ€ì´ë¨¸ë¡œ ì‹œê°„ êµ¬í•˜ê¸°.
 		LARGE_INTEGER time;
 		QueryPerformanceCounter(&time);
 
-		// ¿£Áø ½ÃÀÛ Á÷Àü¿¡´Â µÎ ½Ã°£ °ªÀ» °°°Ô ¸ÂÃã.
+		// ì—”ì§„ ì‹œì‘ ì§ì „ì—ëŠ” ë‘ ì‹œê°„ ê°’ì„ ê°™ê²Œ ë§ì¶¤.
 		currentTime = time.QuadPart;
 		previousTime = currentTime;
 
@@ -65,38 +69,38 @@ namespace Wanted
 			= setting.framerate == 0.0f ? 60.0f : setting.framerate;
 		float oneFrameTime = 1.0f / setting.framerate;
 
-		// ¿£Áø ·çÇÁ(°ÔÀÓ ·çÇÁ).
-		// !->Not -> bool°ª µÚÁı±â.
+		// ì—”ì§„ ë£¨í”„(ê²Œì„ ë£¨í”„).
+		// !->Not -> boolê°’ ë’¤ì§‘ê¸°.
 		while (!isQuit)
 		{
-			// ÇöÀç ½Ã°£ ±¸ÇÏ±â.
+			// í˜„ì¬ ì‹œê°„ êµ¬í•˜ê¸°.
 			QueryPerformanceCounter(&time);
 			currentTime = time.QuadPart;
 
-			// ÇÁ·¹ÀÓ ½Ã°£ °è»ê.
+			// í”„ë ˆì„ ì‹œê°„ ê³„ì‚°.
 			float deltaTime
 				= static_cast<float>(currentTime - previousTime);
 
-			// ÃÊ´ÜÀ§ º¯È¯.
+			// ì´ˆë‹¨ìœ„ ë³€í™˜.
 			deltaTime = deltaTime
 				/ static_cast<float>(frequency.QuadPart);
 
-			// °íÁ¤ ÇÁ·¹ÀÓ ±â¹ı.
+			// ê³ ì • í”„ë ˆì„ ê¸°ë²•.
 			if (deltaTime >= oneFrameTime)
 			{
 				input->ProcessInput();
 
-				// ÇÁ·¹ÀÓ Ã³¸®.
+				// í”„ë ˆì„ ì²˜ë¦¬.
 				BeginPlay();
 				Tick(deltaTime);
 				Draw();
 
-				// ÀÌÀü ½Ã°£ °ª °»½Å.
+				// ì´ì „ ì‹œê°„ ê°’ ê°±ì‹ .
 				previousTime = currentTime;
 
 				input->SavePreviousInputStates();
 
-				// ·¹º§¿¡ ¿äÃ»µÈ Ãß°¡/Á¦°Å Ã³¸®.
+				// ë ˆë²¨ì— ìš”ì²­ëœ ì¶”ê°€/ì œê±° ì²˜ë¦¬.
 				if (mainLevel)
 				{
 					mainLevel->ProcessAddAndDestroyActors();
@@ -104,7 +108,7 @@ namespace Wanted
 			}
 		}
 
-		// Á¤¸®.
+		// ì •ë¦¬.
 		Shutdown();
 	}
 
@@ -115,22 +119,22 @@ namespace Wanted
 
 	void Engine::SetNewLevel(Level* newLevel)
 	{
-		// ±âÁ¸ ·¹º§ ÀÖ´ÂÁö È®ÀÎ.
-		// ÀÖÀ¸¸é ±âÁ¸ ·¹º§ Á¦°Å.
-		// Todo: ÀÓ½Ã ÄÚµå. ·¹º§ ÀüÈ¯ÇÒ ¶§´Â ¹Ù·Î Á¦°ÅÇÏ¸é ¾ÈµÊ.
+		// ê¸°ì¡´ ë ˆë²¨ ìˆëŠ”ì§€ í™•ì¸.
+		// ìˆìœ¼ë©´ ê¸°ì¡´ ë ˆë²¨ ì œê±°.
+		// Todo: ì„ì‹œ ì½”ë“œ. ë ˆë²¨ ì „í™˜í•  ë•ŒëŠ” ë°”ë¡œ ì œê±°í•˜ë©´ ì•ˆë¨.
 		if (mainLevel)
 		{
 			delete mainLevel;
 			mainLevel = nullptr;
 		}
 
-		// ·¹º§ ¼³Á¤.
+		// ë ˆë²¨ ì„¤ì •.
 		mainLevel = newLevel;
 	}
 
 	Engine& Engine::Get()
 	{
-		// ¿¹¿ÜÃ³¸®.
+		// ì˜ˆì™¸ì²˜ë¦¬.
 		if (!instance)
 		{
 			// Silent is violent.
@@ -143,20 +147,20 @@ namespace Wanted
 
 	void Engine::Shutdown()
 	{
-		// Á¤¸® ÀÛ¾÷.
+		// ì •ë¦¬ ì‘ì—….
 		std::cout << "Engine has been shutdown....\n";
 
-		// Ä¿¼­ ÄÑ±â.
+		// ì»¤ì„œ ì¼œê¸°.
 		Util::TurnOnCursor();
 	}
 
 	void Engine::LoadSetting()
 	{
-		// ¿£Áø ¼³Á¤ ÆÄÀÏ ¿­±â.
+		// ì—”ì§„ ì„¤ì • íŒŒì¼ ì—´ê¸°.
 		FILE* file = nullptr;
 		fopen_s(&file, "../Config/Setting.txt", "rt");
 
-		// ¿¹¿ÜÃ³¸®.
+		// ì˜ˆì™¸ì²˜ë¦¬.
 		if (!file)
 		{
 			std::cout << "Failed to open engine setting file.\n";
@@ -164,27 +168,58 @@ namespace Wanted
 			return;
 		}
 
-		// ÆÄÀÏ¿¡¼­ ÀĞÀº µ¥ÀÌÅÍ ´ãÀ» ¹öÆÛ.
+		// íŒŒì¼ì—ì„œ ì½ì€ ë°ì´í„° ë‹´ì„ ë²„í¼.
 		char buffer[2048] = {};
 
-		// ÆÄÀÏ¿¡¼­ ÀĞ±â.
+		// íŒŒì¼ì—ì„œ ì½ê¸°.
 		size_t readSize = fread(buffer, sizeof(char), 2048, file);
 
-		// ¹®ÀÚ¿­ Æ÷¸Ë È°¿ëÇØ¼­ µ¥ÀÌÅÍ ÃßÃâ.
-		sscanf_s(buffer, "framerate = %f", &setting.framerate);
+		// ë¬¸ìì—´ ìë¥´ê¸° (íŒŒì‹±)
+		// ì²«ë²ˆì§¸ ë¬¸ìì—´ ë¶„ë¦¬í•  ë•ŒëŠ” ì²« íŒŒë¼ë¯¸í„° ì „ë‹¬.
+		char* context = nullptr;
+		char* token = nullptr;
+		token = strtok_s(buffer, "\n", &context);
 
-		// ÆÄÀÏ ´İ±â.
+		// ë°˜ë³µí•´ì„œ ìë¥´ê¸°.
+		while (token) {
+		    // ì„¤ì •: í…ìŠ¤íŠ¸ì—ì„œ íŒŒë¼ë¯¸í„° ì´ë¦„ë§Œ ì½ê¸°
+		    char header[10] = {};
+
+		    // ë¬¸ìì—´ ì½ê¸° í•¨ìˆ˜ ì‚¬ìš©.
+		    // ì´ë•Œ "%s"ë¡œ ì½ìœ¼ë©´, "ìŠ¤í˜ì´ìŠ¤"ê°€ ìˆìœ¼ë©´ ê±°ê¸°ê¹Œì§€ ì½ìŒ
+		    sscanf_s(token, "%s", header, 10);
+
+		    // ë¬¸ìì—´ ë¹„êµ ë° ê°’ ì½ê¸°
+		    if (strcmp(header, "framerate") == 0) {
+			sscanf_s(token, "framerate = %f", &setting.framerate);
+		    }
+		    else if (strcmp(header, "width") == 0) {
+			sscanf_s(token, "width = %d", &setting.width);
+		    }
+		    else if (strcmp(header, "height") == 0) {
+			sscanf_s(token, "height = %d", &setting.height);
+		    }
+
+		    // ê°œí–‰ ë¬¸ìë¡œ ë¬¸ìì—´ ë¶„ë¦¬.
+		    token = strtok_s(nullptr, "\n", &context);
+		}
+
+
+		// ë¬¸ìì—´ í¬ë§· í™œìš©í•´ì„œ ë°ì´í„° ì¶”ì¶œ.
+		//sscanf_s(buffer, "framerate = %f", &setting.framerate);
+
+		// íŒŒì¼ ë‹«ê¸°.
 		fclose(file);
 	}
 
 	void Engine::BeginPlay()
 	{
-		// ·¹º§ÀÌ ÀÖÀ¸¸é ÀÌº¥Æ® Àü´Ş.
+		// ë ˆë²¨ì´ ìˆìœ¼ë©´ ì´ë²¤íŠ¸ ì „ë‹¬.
 		if (!mainLevel)
 		{
 			// Silent is violent.
-			// Ä§¹¬Àº Æø·ÂÀÌ´Ù.
-			// -> ·Î±× ¸Ş½ÃÁö ¾È³²±â¸é ³ªºü.
+			// ì¹¨ë¬µì€ í­ë ¥ì´ë‹¤.
+			// -> ë¡œê·¸ ë©”ì‹œì§€ ì•ˆë‚¨ê¸°ë©´ ë‚˜ë¹ .
 			std::cout << "mainLevel is empty.\n";
 			return;
 		}
@@ -200,8 +235,8 @@ namespace Wanted
 
 
 
-		// ·¹º§¿¡ ÀÌº¥Æ® Èê¸®±â.
-		// ¿¹¿ÜÃ³¸®.
+		// ë ˆë²¨ì— ì´ë²¤íŠ¸ í˜ë¦¬ê¸°.
+		// ì˜ˆì™¸ì²˜ë¦¬.
 		if (!mainLevel)
 		{
 			std::cout << "Error: Engine::Tick(). mainLevel is empty.\n";
@@ -213,14 +248,18 @@ namespace Wanted
 
 	void Engine::Draw()
 	{
-		// ·¹º§¿¡ ÀÌº¥Æ® Èê¸®±â.
-		// ¿¹¿ÜÃ³¸®.
+		// ë ˆë²¨ì— ì´ë²¤íŠ¸ í˜ë¦¬ê¸°.
+		// ì˜ˆì™¸ì²˜ë¦¬.
 		if (!mainLevel)
 		{
 			std::cout << "Error: Engine::Draw(). mainLevel is empty.\n";
 			return;
 		}
 
+		// ë ˆë²¨ì˜ ëª¨ë“  ì•¡í„°ê°€ ë Œë” ë°ì´í„°ë¥¼ ì œì¶œ.
 		mainLevel->Draw();
+
+		// ë“œë¡œìš° ì½œ.
+		renderer->Draw();
 	}
 }
